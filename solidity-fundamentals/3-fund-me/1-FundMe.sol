@@ -33,7 +33,10 @@ contract FundMe {
             - this will revert the transaction if the conditions are not met
         */
         myValue += 1;
-        require(msg.value >= 1e18, "didn't send enough ETH"); // 1e18 Wei = 1 ETH, in smart contract this is how they process number, in a very small chunk like Wei, and gas cost are shown in form of Gwei, 1e9 Gwei = 1 ETH
+        require(msg.value >= 1e18, "didn't send enough ETH"); 
+        /*  
+            1e18 Wei = 1 ETH, in smart contract this is how they process number, in a very small chunk like Wei, and gas cost are shown in form of Gwei, 1e9 Gwei = 1 ETH
+        */
 
         /* 
             What is a revert? 
