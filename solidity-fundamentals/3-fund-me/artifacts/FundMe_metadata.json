@@ -14,6 +14,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "myValue",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "withdraw",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -48,11 +61,11 @@
 	},
 	"sources": {
 		"solidity-fundamentals/3-fund-me/1-FundMe.sol": {
-			"keccak256": "0x208cb4ff7b8f9e647a1394a581393b43d55e276a931111153604fe13a2960059",
+			"keccak256": "0x9faf5640b74c783b1f5788685f7ec76ab9d0688dd7d94a2a171e99e59ff32780",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://1fcef3fe1caea0f5facef7b1646e7843dcc1abe49c8480d792d0bf12dde49fd2",
-				"dweb:/ipfs/Qmb5cFB1AcK1CFCCxwnLfE8PF7A98XWgYvTdFgoZTAWV5S"
+				"bzz-raw://3a4775b110ce2fffdf8ccbf315d193286474c4b5f2da86ee0561225300022ae9",
+				"dweb:/ipfs/QmNSZPxbBznybbCTZsHH1Qk9DVVeanspvhaP8wyddntW2W"
 			]
 		}
 	},
