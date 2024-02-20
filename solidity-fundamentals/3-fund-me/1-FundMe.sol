@@ -21,7 +21,7 @@ contract FundMe {
         Q1. But how do we send ETH to this contract? 
             => Whenever we send a tracsaction in a contract (changing the state of the contract) there is always a "value" field. With is set to 0 by default. This value field is the amount of native blockchain currency that gets sent with every transaction.
 
-        - We will need to use the keyword "payable" in our function to access this native blockchain currency
+        - We will need to use the keyword "payable" in our function in order to receive or access native currency through our function
         - we will see remix ui will now make the fund function red color, indicating this function is associated with payments or transfering currencies 
     */
     uint256 public myValue = 0;
@@ -34,9 +34,7 @@ contract FundMe {
         */
         myValue += 1;
         require(msg.value >= 1e18, "didn't send enough ETH"); 
-        /*  
-            1e18 Wei = 1 ETH, in smart contract this is how they process number, in a very small chunk like Wei, and gas cost are shown in form of Gwei, 1e9 Gwei = 1 ETH
-        */
+        // 1e18 Wei = 1 ETH, in smart contract this is how they process number, in a very small chunk like Wei, and gas cost are shown in form of Gwei, 1e9 Gwei = 1 ETH
 
         /* 
             What is a revert? 
