@@ -73,7 +73,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/3-FundMe.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/4-FundMe.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -87,12 +87,20 @@
 		"remappings": []
 	},
 	"sources": {
-		"solidity-fundamentals/3-fund-me/3-FundMe.sol": {
-			"keccak256": "0xecf641a550c0b27abdc0dba2a2ff33d3afdebfaf5d288a413ed78cf67c235f1e",
+		"@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+			"keccak256": "0xfe4e8bb4861bb3860ba890ab91a3b818ec66e5a8f544fb608cfcb73f433472cd",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d2b69a6d4a6649a1ca12034300e08ea5fcb01298d3de08b11d5203cd5b0bca1d",
-				"dweb:/ipfs/Qma9MnUC7BhCWxoPTnETRwa8Gpb6ZmWkUrKdsCXi27QjSR"
+				"bzz-raw://644cff84052e1e82b5bb502b2a46e8f142a62b0db4cd9b38200798ba8373c6f7",
+				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
+			]
+		},
+		"solidity-fundamentals/3-fund-me/4-FundMe.sol": {
+			"keccak256": "0x347c20a7c2bfabdfc42883d64cb3affd58755acd05a617c4e50d121577c95d8d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d3c79c335e1b14896b98660ba4c1884bedb9e93ef219f48c98ff7b373a8a7e20",
+				"dweb:/ipfs/QmZ3zVb1atUmXzNQuQRLC3XnEhZwutBJGRXqsypn8pgxhH"
 			]
 		}
 	},
