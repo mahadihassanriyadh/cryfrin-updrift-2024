@@ -14,7 +14,34 @@
 			},
 			{
 				"inputs": [],
-				"name": "myValue",
+				"name": "getConversionRate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getPrice",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getVersion",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "minUsd",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -46,7 +73,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/1-FundMe.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/3-FundMe.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -60,12 +87,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"solidity-fundamentals/3-fund-me/1-FundMe.sol": {
-			"keccak256": "0x0308b1885da44eb4f380b8e126a26c71062cc09f89bee17801682814de71720c",
+		"solidity-fundamentals/3-fund-me/3-FundMe.sol": {
+			"keccak256": "0xfadb0c2dde083452f8e3df69f46146b20f1640872f91fed1d842233d0312af4f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://834c5529171552848939f7bbc564260d122ed0543ba4cf93e84586a1d61bf040",
-				"dweb:/ipfs/QmdnWeCs7GFZxL1m8J5CAKJ283vu147YhzefPo8AJk2q31"
+				"bzz-raw://11174a4653cdd73f5fc455f8fdf9370be0bfe9bd652f96ebf595354f60120731",
+				"dweb:/ipfs/QmdfrXpLKhmMdyQTfxuMp8qFcEanQyA6zwX8sDLjTRt5jg"
 			]
 		}
 	},
