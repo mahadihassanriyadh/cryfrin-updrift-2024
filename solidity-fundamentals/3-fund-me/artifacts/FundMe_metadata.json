@@ -9,7 +9,7 @@
 				"inputs": [],
 				"name": "fund",
 				"outputs": [],
-				"stateMutability": "nonpayable",
+				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
@@ -48,11 +48,11 @@
 	},
 	"sources": {
 		"solidity-fundamentals/3-fund-me/1-FundMe.sol": {
-			"keccak256": "0x11e2bfc20f6d0dc0d11a76c74390528c165c367bb2a7c0522394202d65dffbe2",
+			"keccak256": "0x208cb4ff7b8f9e647a1394a581393b43d55e276a931111153604fe13a2960059",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://fe88ec44980cd2ee7ef59f8b5f2b0c68238b7c8a8a6e4ab1a55247328ccb088a",
-				"dweb:/ipfs/QmUA7W5ZKhWURHd2Q1Trb2yV63tqNB7BpdWvqxicmSNUL2"
+				"bzz-raw://1fcef3fe1caea0f5facef7b1646e7843dcc1abe49c8480d792d0bf12dde49fd2",
+				"dweb:/ipfs/Qmb5cFB1AcK1CFCCxwnLfE8PF7A98XWgYvTdFgoZTAWV5S"
 			]
 		}
 	},
