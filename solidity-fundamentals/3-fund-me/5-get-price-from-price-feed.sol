@@ -38,13 +38,19 @@ contract FundMe {
         return uint256(answer * 1e10);
     }
 
+    function getConversionRate(uint256 ethAmmount) public view returns(uint256) {
+        uint256 ethPrice = getPrice();
+        // price of 1e18 wei in usd is getPrice();
+        uint256 ethAmmountInUSD = (ethPrice * ethAmmount) / 1e18;
+
+        return ethAmmountInUSD;
+    }
+
     function getVersion() public view returns (uint256) {
         return
             AggregatorV3Interface(chainlinkAggregatorV3InterfaceAddressEthUsd)
                 .version();
     }
-
-    function getConversionRate() public {}
 
     function withdraw() public {}
 }

@@ -13,10 +13,22 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "ethAmmount",
+						"type": "uint256"
+					}
+				],
 				"name": "getConversionRate",
-				"outputs": [],
-				"stateMutability": "nonpayable",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -102,11 +114,11 @@
 			]
 		},
 		"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": {
-			"keccak256": "0xdb61591ac22ea3cee96c1e5ff3f9a09d7ce8022951171e191776f1aa751e5946",
+			"keccak256": "0x10cf367cfe38aa4d3b87115c75427278f81e11bfaf424528e3e63ee2c7e25acb",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://57ab5a5ad2fb78c1c1f24db3438b6f992a4d9e3f54769cd2c269e4bd81f7e27b",
-				"dweb:/ipfs/Qmf2a5HTSsqE4u1Dmj1wn7dpVLd4HvqYJWan8qqes7Bin3"
+				"bzz-raw://58bad79a0eb3138df14344968a39809c257cc78d766c9edc309c861b094265b6",
+				"dweb:/ipfs/QmSbE8wmPP6R4zbuM45QC1bxpduEwvG7SxWbfcEZzUcwnk"
 			]
 		}
 	},
