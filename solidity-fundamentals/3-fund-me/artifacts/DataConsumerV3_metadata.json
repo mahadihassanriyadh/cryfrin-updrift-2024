@@ -65,11 +65,11 @@
 			]
 		},
 		"solidity-fundamentals/3-fund-me/chainlink-data-feeds.sol": {
-			"keccak256": "0x7678063ac23da2b35457651ee90166bb607e855d823554ffafb1798d220456a8",
+			"keccak256": "0x02b9ea43735eb591e1a1fc867088336a62d98221f4b1b110aeebb0b0aa0aaeea",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://a63e5eedb80432fd37407d6e6f5265f95defe909ee14b1ae7136a98681fb7551",
-				"dweb:/ipfs/QmUFf8YrkDWjBYieBS4kB3mNC9tBagNekySEyF6UibHcgE"
+				"bzz-raw://fd51f326cdac4483da9dd84127cc3faa4d9ed6b69411599f037f5394c7a3218f",
+				"dweb:/ipfs/QmcYKP16K8x3mnGcPrwkHC246L271bQicnTRmVCrazqAhc"
 			]
 		}
 	},

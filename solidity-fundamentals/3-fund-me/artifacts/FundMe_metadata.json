@@ -22,8 +22,14 @@
 			{
 				"inputs": [],
 				"name": "getPrice",
-				"outputs": [],
-				"stateMutability": "nonpayable",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -73,7 +79,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/4-FundMe.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -95,12 +101,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/4-FundMe.sol": {
-			"keccak256": "0x347c20a7c2bfabdfc42883d64cb3affd58755acd05a617c4e50d121577c95d8d",
+		"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": {
+			"keccak256": "0xdb61591ac22ea3cee96c1e5ff3f9a09d7ce8022951171e191776f1aa751e5946",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d3c79c335e1b14896b98660ba4c1884bedb9e93ef219f48c98ff7b373a8a7e20",
-				"dweb:/ipfs/QmZ3zVb1atUmXzNQuQRLC3XnEhZwutBJGRXqsypn8pgxhH"
+				"bzz-raw://57ab5a5ad2fb78c1c1f24db3438b6f992a4d9e3f54769cd2c269e4bd81f7e27b",
+				"dweb:/ipfs/Qmf2a5HTSsqE4u1Dmj1wn7dpVLd4HvqYJWan8qqes7Bin3"
 			]
 		}
 	},

@@ -40,7 +40,7 @@ contract DataConsumerV3 {
     /**
      * Returns the latest answer.
      */
-    function getChainlinkDataFeedLatestAnswer() public view returns (int) {
+    function getChainlinkDataFeedLatestAnswer() public view returns (int256) {
         // prettier-ignore
         (
             /* uint80 roundID */,

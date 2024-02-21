@@ -3,7 +3,6 @@
 pragma solidity ^0.8.24;
 
 contract FundMe {
-
     uint256 public minUsd = 5;
 
     function fund() public payable {
@@ -17,10 +16,8 @@ contract FundMe {
             Blockchain Oracle: Any device that interacts with the off-chain world to provide external data or computation to smart contracts. But if we introduce a centralized oracle then we fell into the same problem again, which we went to solve with Blockchain. That is why Chainlink build a Decentralized Oracle Network.
         */
 
-        require(msg.value >= minUsd, "didn't send enough ETH"); 
+        require(msg.value >= minUsd, "didn't send enough ETH");
     }
 
-    function withdraw() public {
-
-    }
+    function withdraw() public {}
 }
