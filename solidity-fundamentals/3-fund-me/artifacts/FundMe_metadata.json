@@ -12,6 +12,11 @@
 			},
 			{
 				"inputs": [],
+				"name": "NotFundOwner",
+				"type": "error"
+			},
+			{
+				"inputs": [],
 				"name": "MIN_USD",
 				"outputs": [
 					{
@@ -102,7 +107,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/13-custom-error.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -124,12 +129,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": {
-			"keccak256": "0x9fb1275013171c59e5dc18509a04cbd8b4cdc7d2654507ca9e680bc4cdd4f4bc",
+		"solidity-fundamentals/3-fund-me/13-custom-error.sol": {
+			"keccak256": "0xe1f2efb49a10afbb73ac935c9e2c0a39c075e5d5864be33876b4dd25771481d6",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://30273ab05bb6a8d374e7ada624707cc8d6e2d8d68d6ca734883839849061a53a",
-				"dweb:/ipfs/QmewMbsyPtLNQ6GvH5UvpBgAbuBCAgtyDo6ZivgGBpTjGq"
+				"bzz-raw://2de5ed75cc482efe8533704d56a74a9f683c77e8fb21a4181514a6f59ddd7245",
+				"dweb:/ipfs/QmQ7M2B1V9ga4r9AGTjwr3Xn1sfXETZFifengUmFbd2Ama"
 			]
 		},
 		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
