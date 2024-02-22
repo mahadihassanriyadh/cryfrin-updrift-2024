@@ -1,0 +1,45 @@
+{
+	"compiler": {
+		"version": "0.6.12+commit.27d51765"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"solidity-fundamentals/3-fund-me/SafeMathTester.sol": "SafeMathTesterSol"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"solidity-fundamentals/3-fund-me/SafeMathTester.sol": {
+			"keccak256": "0xc41db66e791b6b79d08cb2d9778eb7caa09fc1f1fc872eabe12dc403b477e715",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://19769a149f117f985e99882bffb550e7ed2d4976b999a042e936f4fdbdc780da",
+				"dweb:/ipfs/QmeQwfWstfcYfTaoM72MZEX6FRPcUXiLHnFL884vvvNdSW"
+			]
+		}
+	},
+	"version": 1
+}

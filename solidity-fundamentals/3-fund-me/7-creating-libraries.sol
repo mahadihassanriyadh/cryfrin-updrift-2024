@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.24;
 
-import {PriceConverter } from "../library/PriceConverter.sol";
+import {PriceConverter} from "./library/PriceConverter.sol";
 
 contract FundMe {
     /*  

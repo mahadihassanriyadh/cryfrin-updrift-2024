@@ -107,14 +107,14 @@
 			]
 		},
 		"solidity-fundamentals/3-fund-me/7-creating-libraries.sol": {
-			"keccak256": "0x4dcdf9e8865eb5213a331552bccaaebb1ef78ffaa23ca3e2c3daba83a1723283",
+			"keccak256": "0x955804e236b6f914366191fe7b85b0341a0e9c1181355870539ca98d934c878b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0967f4f9f66636d456ff50840e92aeba800ca3f29f47136ee743cee6f44454ed",
-				"dweb:/ipfs/QmcWtBTEJQLMv49sVZxNE6ivCgWoJf8J4911tcTAEr7hod"
+				"bzz-raw://2564398a8822760c064d1e8b0dc014566800999d068c70e468c1fbbf245c87f7",
+				"dweb:/ipfs/QmPiDivjEAg3Re4QuSebdpbzAVxMzrZMadmgdyzwo6xC21"
 			]
 		},
-		"solidity-fundamentals/library/PriceConverter.sol": {
+		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
 			"keccak256": "0x0566e26f0abc9d04d73dbb33b2bdb6be6bf841c3ae8aa2b34aea3a4c0ddbe7a2",
 			"license": "MIT",
 			"urls": [

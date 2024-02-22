@@ -18,7 +18,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/library/PriceConverter.sol": "PriceConverter"
+			"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": "PriceConverter"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -40,7 +40,7 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/library/PriceConverter.sol": {
+		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
 			"keccak256": "0x0566e26f0abc9d04d73dbb33b2bdb6be6bf841c3ae8aa2b34aea3a4c0ddbe7a2",
 			"license": "MIT",
 			"urls": [
