@@ -5,14 +5,18 @@ pragma solidity ^0.8.24;
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
-    uint256 public minUsd = 5;
+    // as getConversionRate() returns a value with 18 decimal places the minUsd should be in 18 decimal places as well
+    uint256 public minUsd = 5e18;
     address chainlinkAggregatorV3InterfaceAddressEthUsd =
         0x694AA1769357215DE4FAC081bf1f309aDC325306;
 
     function fund() public payable {
         // this msg.value is in Wei
         // so it has 18 decimal places, as 1 ETH = 1e18 Wei
-        require(msg.value >= minUsd, "didn't send enough ETH");
+        require(
+            getConversionRate(msg.value) >= minUsd,
+            "didn't send enough ETH"
+        );
     }
 
     function getPrice() public view returns (uint256) {
@@ -38,9 +42,17 @@ contract FundMe {
         return uint256(answer * 1e10);
     }
 
-    function getConversionRate(uint256 ethAmmount) public view returns(uint256) {
+    function getConversionRate(uint256 ethAmmount)
+        public
+        view
+        returns (uint256)
+    {
         uint256 ethPrice = getPrice();
-        // price of 1e18 wei in usd is getPrice();
+        // price of 1e18 wei in usd getPrice();
+        // as both ethPrice and ethAmmount was converted into 18 decimals, after multiplying both of them this would become 36 decimals
+        // but we need the price of the eth in in usd in terms wei, which is 18 decimals
+        // so we devide the result by 1e18
+        // our final result in USD will be in 18 decimal as well
         uint256 ethAmmountInUSD = (ethPrice * ethAmmount) / 1e18;
 
         return ethAmmountInUSD;

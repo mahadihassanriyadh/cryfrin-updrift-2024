@@ -114,11 +114,11 @@
 			]
 		},
 		"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": {
-			"keccak256": "0x10cf367cfe38aa4d3b87115c75427278f81e11bfaf424528e3e63ee2c7e25acb",
+			"keccak256": "0x622bd07119e44649aa94ecbcae078586ec9bd63accac6c1a5ccc1c3d3c415987",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://58bad79a0eb3138df14344968a39809c257cc78d766c9edc309c861b094265b6",
-				"dweb:/ipfs/QmSbE8wmPP6R4zbuM45QC1bxpduEwvG7SxWbfcEZzUcwnk"
+				"bzz-raw://8a2496044f885e6a16864b4566cef409563669897fc938042994cea583ee3ed8",
+				"dweb:/ipfs/QmciHiMEZxuD2UEp1zJ98tYAuQzNDYqiZFJjKWgFQeyryS"
 			]
 		}
 	},
