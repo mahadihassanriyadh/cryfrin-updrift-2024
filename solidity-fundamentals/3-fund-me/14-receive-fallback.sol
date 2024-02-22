@@ -12,7 +12,7 @@ import {PriceConverter} from "./library/PriceConverter.sol";
     - so there are way we can trigger some code when someone sent some money in our contract without using the fund function
     - there are two special functions
         1. receive()
-        2. fallback()
+        2. fallback()ˇ
     
     ---------------------------------------
     -------------- receive() --------------

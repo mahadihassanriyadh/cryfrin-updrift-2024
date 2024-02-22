@@ -174,11 +174,11 @@
 			]
 		},
 		"solidity-fundamentals/3-fund-me/14-receive-fallback.sol": {
-			"keccak256": "0xfe5401c5ae1b0deaee4241b7230984f9f4b121a59440bdbdfc0d93b01cbdffc9",
+			"keccak256": "0xeffeaa9d470962febe6eab3fa47557b606da446fd2cab3b023ad1f018a98471f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4d6852e11ddd03d68592af98fec376bd5794b69a85f7f1289efb39ea2be153cb",
-				"dweb:/ipfs/QmaD1AdNVMjQimFr9H1dc5UR8bSP9nMGSDQjvNR51tauEy"
+				"bzz-raw://2f4b63707fb1e26b7fcc61c90238e09619868a23dde093e732b2d656b0a4716c",
+				"dweb:/ipfs/QmVJjqgHdP8xYhNuQjmnorCyN6h65p9WoQHfTSHyCa2pLU"
 			]
 		},
 		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
