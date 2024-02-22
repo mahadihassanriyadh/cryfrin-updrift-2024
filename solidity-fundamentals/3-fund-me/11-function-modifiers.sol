@@ -14,6 +14,7 @@ contract FundMe {
     mapping(address => uint256) public addressToAmountFunded;
 
     address public fundOwner;
+
     constructor() {
         fundOwner = msg.sender;
     }
@@ -51,7 +52,10 @@ contract FundMe {
         - we also could place it (_;) above the require call, in that case all the code in the function would execute first then the require line
     */
     modifier onlyOwner() {
-        require(msg.sender == fundOwner, "You are not authorized to withdraw the fund!");
+        require(
+            msg.sender == fundOwner,
+            "You are not authorized to withdraw the fund!"
+        );
         _;
     }
 }
