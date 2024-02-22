@@ -20,9 +20,14 @@ import {PriceConverter} from "./library/PriceConverter.sol";
         if (msg.sender != i_fundOwner) {
             revert NotFundOwner();
         }
+
+    - after changing all requires to custom error, our gas:
+    - 7,97,358 -> 7,39,560
 */
 
+error DidNotSendMinEth();
 error NotFundOwner();
+error FundTransferFailed();
 
 contract FundMe {
     using PriceConverter for uint256;
@@ -41,10 +46,14 @@ contract FundMe {
     }
 
     function fund() public payable {
-        require(
-            msg.value.getConversionRate() >= MIN_USD,
-            "didn't send enough ETH"
-        );
+        // require(
+        //     msg.value.getConversionRate() >= MIN_USD,
+        //     "didn't send enough ETH"
+        // );
+
+        if (msg.value.getConversionRate() < MIN_USD) {
+            revert DidNotSendMinEth();
+        }
 
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] += msg.value;
@@ -60,7 +69,10 @@ contract FundMe {
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
-        require(callSuccess, "Call failed!!!!!");
+        // require(callSuccess, "Call failed!!!!!");
+        if (!callSuccess) {
+            revert FundTransferFailed();
+        }
     }
 
     modifier onlyOwner() {
@@ -68,6 +80,7 @@ contract FundMe {
         //     msg.sender == i_fundOwner,
         //     "You are not authorized to withdraw the fund!"
         // );
+        
         if (msg.sender != i_fundOwner) {
             revert NotFundOwner();
         }
