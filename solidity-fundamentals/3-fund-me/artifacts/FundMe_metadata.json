@@ -6,6 +6,25 @@
 	"output": {
 		"abi": [
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "addressToAmountFunded",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "fund",
 				"outputs": [],
@@ -13,27 +32,19 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "getConversionRate",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getPrice",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getVersion",
-				"outputs": [
+				"inputs": [
 					{
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
+					}
+				],
+				"name": "funders",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -73,7 +84,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/4-importing-from-npm-github.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/7-creating-libraries.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -95,12 +106,20 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/4-importing-from-npm-github.sol": {
-			"keccak256": "0x2adb34d5b690e3028615caa76c47c124ad720ddcee31df8f3a8c1af4cf44e1a3",
+		"solidity-fundamentals/3-fund-me/7-creating-libraries.sol": {
+			"keccak256": "0x4dcdf9e8865eb5213a331552bccaaebb1ef78ffaa23ca3e2c3daba83a1723283",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://cb35aed42c5170a86d129a19b3edea5a86f12797bef6bed2b7a43d9ac5fe2f53",
-				"dweb:/ipfs/QmeMgLLMphGsk5r6Lm9utDyNoDmcFZZtDkabM7D3QFq26J"
+				"bzz-raw://0967f4f9f66636d456ff50840e92aeba800ca3f29f47136ee743cee6f44454ed",
+				"dweb:/ipfs/QmcWtBTEJQLMv49sVZxNE6ivCgWoJf8J4911tcTAEr7hod"
+			]
+		},
+		"solidity-fundamentals/library/PriceConverter.sol": {
+			"keccak256": "0x0566e26f0abc9d04d73dbb33b2bdb6be6bf841c3ae8aa2b34aea3a4c0ddbe7a2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://95846552c106d74fe3167d9c9eca6d627378d50465760a4d1d9009c7602098e4",
+				"dweb:/ipfs/QmeypL8YmHbr1ggK6Y9UDg7gmDw4995fNcy43auf4ztJKo"
 			]
 		}
 	},
