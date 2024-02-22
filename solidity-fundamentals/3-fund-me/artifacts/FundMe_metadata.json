@@ -12,6 +12,25 @@
 			},
 			{
 				"inputs": [],
+				"name": "DidNotSendMinEth",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "FundTransferFailed",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "NotFundOwner",
+				"type": "error"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "fallback"
+			},
+			{
+				"inputs": [],
 				"name": "MIN_USD",
 				"outputs": [
 					{
@@ -83,10 +102,40 @@
 			},
 			{
 				"inputs": [],
+				"name": "testFallbackTrigger",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "testFallbackVar",
+				"outputs": [
+					{
+						"internalType": "int256",
+						"name": "",
+						"type": "int256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "withdraw",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
 			}
 		],
 		"devdoc": {
@@ -102,7 +151,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/14-receive-fallback.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -124,12 +173,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": {
-			"keccak256": "0x9fb1275013171c59e5dc18509a04cbd8b4cdc7d2654507ca9e680bc4cdd4f4bc",
+		"solidity-fundamentals/3-fund-me/14-receive-fallback.sol": {
+			"keccak256": "0xfe5401c5ae1b0deaee4241b7230984f9f4b121a59440bdbdfc0d93b01cbdffc9",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://30273ab05bb6a8d374e7ada624707cc8d6e2d8d68d6ca734883839849061a53a",
-				"dweb:/ipfs/QmewMbsyPtLNQ6GvH5UvpBgAbuBCAgtyDo6ZivgGBpTjGq"
+				"bzz-raw://4d6852e11ddd03d68592af98fec376bd5794b69a85f7f1289efb39ea2be153cb",
+				"dweb:/ipfs/QmaD1AdNVMjQimFr9H1dc5UR8bSP9nMGSDQjvNR51tauEy"
 			]
 		},
 		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {

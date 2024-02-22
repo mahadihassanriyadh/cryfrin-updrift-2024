@@ -39,7 +39,7 @@ contract FundMe {
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
 
-    address public i_fundOwner;
+    address public immutable i_fundOwner;
 
     constructor() {
         i_fundOwner = msg.sender;
@@ -80,7 +80,7 @@ contract FundMe {
         //     msg.sender == i_fundOwner,
         //     "You are not authorized to withdraw the fund!"
         // );
-        
+
         if (msg.sender != i_fundOwner) {
             revert NotFundOwner();
         }
