@@ -6,6 +6,11 @@
 	"output": {
 		"abi": [
 			{
+				"inputs": [],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -29,6 +34,19 @@
 				"name": "fund",
 				"outputs": [],
 				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "fundOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -84,7 +102,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/9-withdraw-transfer-send-call.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/10-smart-contract-constructor.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -106,12 +124,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/9-withdraw-transfer-send-call.sol": {
-			"keccak256": "0xf811039b1d937d9565f103cbd17cf8a5f39a8a79603a7d754e9f013ea4b4ee4c",
+		"solidity-fundamentals/3-fund-me/10-smart-contract-constructor.sol": {
+			"keccak256": "0x1470207124ad6a5c4a5eaa41a811b41f3e86f27fe1888682715e0b96ab106991",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://e24db444104379de4e1a993440a6a16352d1b61c9d8dfe2baca8ee57aa66c3e4",
-				"dweb:/ipfs/Qme6hqGo1TM9GAisMeXrGo9G1rhDuVErFNMMyjYNTRxGip"
+				"bzz-raw://e552c7b762e819157cc5210b45c4607c496aa89fc2cf505c4ab603d2f657bb5a",
+				"dweb:/ipfs/Qmd2yZC7qjUmmnQSuHV4oSCJb7snRzXA5eAat5XAKntEWc"
 			]
 		},
 		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
