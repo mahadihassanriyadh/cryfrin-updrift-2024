@@ -11,6 +11,19 @@
 				"type": "constructor"
 			},
 			{
+				"inputs": [],
+				"name": "MIN_USD",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -37,19 +50,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "fundOwner",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -70,12 +70,12 @@
 			},
 			{
 				"inputs": [],
-				"name": "minUsd",
+				"name": "i_fundOwner",
 				"outputs": [
 					{
-						"internalType": "uint256",
+						"internalType": "address",
 						"name": "",
-						"type": "uint256"
+						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -102,7 +102,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/11-function-modifiers.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -124,12 +124,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/11-function-modifiers.sol": {
-			"keccak256": "0xe600031a207169f731ae8f0005bbdd63ec7f54d4dc41c88c2f5cfe3698ad5414",
+		"solidity-fundamentals/3-fund-me/12-constant-immutibility.sol": {
+			"keccak256": "0x9fb1275013171c59e5dc18509a04cbd8b4cdc7d2654507ca9e680bc4cdd4f4bc",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://1f262a35ca693a0b8b69588dfec35c0fa49c45bebf9c648d20f0066075e40184",
-				"dweb:/ipfs/QmUj6ioCNm1HT3PEUG5LKjXUgcTsuinFozah6H9iGkz8Cj"
+				"bzz-raw://30273ab05bb6a8d374e7ada624707cc8d6e2d8d68d6ca734883839849061a53a",
+				"dweb:/ipfs/QmewMbsyPtLNQ6GvH5UvpBgAbuBCAgtyDo6ZivgGBpTjGq"
 			]
 		},
 		"solidity-fundamentals/3-fund-me/library/PriceConverter.sol": {
