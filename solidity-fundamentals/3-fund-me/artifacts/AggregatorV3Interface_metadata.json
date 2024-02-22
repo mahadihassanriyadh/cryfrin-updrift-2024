@@ -145,11 +145,11 @@
 	},
 	"sources": {
 		"solidity-fundamentals/3-fund-me/3-solidity-interfaces.sol": {
-			"keccak256": "0x6d0d349224f13aa8df64cad5d3d08eb6ca770243ee01d0aa1e917a22ef0169e8",
+			"keccak256": "0x6532e5ac6b644a292df3bcc9e02d455b5b6dd626ac5091bc7453df8d46051a1a",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://25bb18e0c18cccb862e239981a678c7dc85e1f2048d808386ce5cdf9be32605f",
-				"dweb:/ipfs/QmaBqQHw8nf6p8TXZ6Hu3kTjZNuJXgXDBrm2EtwPwR7s2c"
+				"bzz-raw://077df7c5cdb1c6c14c20379a65a9a4dad23071e0dafbaacda3fdde7ef9bdfcf2",
+				"dweb:/ipfs/QmT47oi29HqgtG3QpB4qcgUjzEZyE2VgpZWRqavstJ65Zs"
 			]
 		}
 	},

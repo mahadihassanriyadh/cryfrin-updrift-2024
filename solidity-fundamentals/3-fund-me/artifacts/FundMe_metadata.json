@@ -13,35 +13,17 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "ethAmmount",
-						"type": "uint256"
-					}
-				],
+				"inputs": [],
 				"name": "getConversionRate",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
 				"name": "getPrice",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -91,7 +73,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": "FundMe"
+			"solidity-fundamentals/3-fund-me/4-importing-from-npm-github.sol": "FundMe"
 		},
 		"evmVersion": "shanghai",
 		"libraries": {},
@@ -113,12 +95,12 @@
 				"dweb:/ipfs/QmTa99QHrJBn3SXDizquPBUiTxVCNKQrHgaWJhuds5Sce2"
 			]
 		},
-		"solidity-fundamentals/3-fund-me/5-get-price-from-price-feed.sol": {
-			"keccak256": "0x622bd07119e44649aa94ecbcae078586ec9bd63accac6c1a5ccc1c3d3c415987",
+		"solidity-fundamentals/3-fund-me/4-importing-from-npm-github.sol": {
+			"keccak256": "0x2adb34d5b690e3028615caa76c47c124ad720ddcee31df8f3a8c1af4cf44e1a3",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://8a2496044f885e6a16864b4566cef409563669897fc938042994cea583ee3ed8",
-				"dweb:/ipfs/QmciHiMEZxuD2UEp1zJ98tYAuQzNDYqiZFJjKWgFQeyryS"
+				"bzz-raw://cb35aed42c5170a86d129a19b3edea5a86f12797bef6bed2b7a43d9ac5fe2f53",
+				"dweb:/ipfs/QmeMgLLMphGsk5r6Lm9utDyNoDmcFZZtDkabM7D3QFq26J"
 			]
 		}
 	},
