@@ -3,29 +3,29 @@
 pragma solidity ^0.8.24;
 
 contract SimpleStorage {
-    uint256 public myFavNum;
+    uint256 myFavNum; // 0
+
+    uint256[] listOfFavNums; // []
 
     struct Person {
-        string name;
-        uint8 age;
         uint256 favNum;
+        string name;
     }
 
-    mapping(string => Person) nameToPersonDetails;
+    Person[] public dynamicListOfPeople; // []
 
-    function storeMyFavNum(uint256 _myFavNum) public {
-        myFavNum = _myFavNum;
+    mapping(string => uint256) public nameToFavNumber;
+
+    function store(uint256 _favNum) public {
+        myFavNum = _favNum;
     }
 
-    function retrieveMyFavNum() public view returns (uint256) {
+    function retrieve() public view returns (uint256) {
         return myFavNum;
     }
 
-    function storePersonDetails(
-        string memory _name,
-        uint8 _age,
-        uint256 _favNum
-    ) public {
-        nameToPersonDetails[_name] = Person(_name, _age, _favNum);
+    function addPerson(string memory _name, uint256 _favNum) public {
+        dynamicListOfPeople.push(Person({name: _name, favNum: _favNum}));
+        nameToFavNumber[_name] = _favNum;
     }
 }
