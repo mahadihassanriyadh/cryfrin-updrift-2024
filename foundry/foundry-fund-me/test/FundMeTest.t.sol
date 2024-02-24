@@ -3,18 +3,28 @@
 pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
+import {FundMe} from "../src/FundMe.sol";
 
 contract FundMeTest is Test {
-    uint256 number = 555;
+    FundMe fundMe;
 
-    // this is the first thing that runs before any tests
     function setUp() external {
-
+        fundMe = new FundMe();
     }
 
-    function testDemo() public {
-        console.log("Hello, World!");
-        console.log("Number is: ", number);
-        assertEq(number, 555);
+    function testMinUsdIsFive() public {
+        assertEq(fundMe.MIN_USD(), 5e18);
+    }
+
+    /* 
+        - here FundMeTest is the owner of the FundMe contract as it created it
+        - so if we would call msg.sender it would be the sender of the transaction, not the owner of the contract
+        - but address(this) gives us the address of our test contract
+    */
+    function testOwnerIsMsgSender() public {
+        console.log("fundMe.i_fundOwner()", fundMe.i_fundOwner());
+        console.log("address(this)", address(this));
+        console.log("msg.sender", msg.sender);
+        assertEq(fundMe.i_fundOwner(), address(this));
     }
 }
