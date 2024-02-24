@@ -3,6 +3,7 @@
 pragma solidity ^0.8.24;
 
 import {PriceConverter} from "./PriceConverter.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // it's a convention to add the contract name before the error so that it's easier for us to understand where the error is coming from
 error FundMe__DidNotSendMinEth();
@@ -51,6 +52,13 @@ contract FundMe {
         if (!callSuccess) {
             revert FundMe__FundTransferFailed();
         }
+    }
+
+    function getVersion() public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
+            chainlinkAggregatorV3InterfaceAddressEthUsd
+        );
+        return priceFeed.version();
     }
 
     modifier onlyOwner() {
