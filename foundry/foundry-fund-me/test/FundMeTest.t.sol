@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.24;
 
+// import {Test, console} from "forge-std/Test.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {FundMe} from "../src/FundMe.sol";
 
@@ -22,9 +23,6 @@ contract FundMeTest is Test {
         - but address(this) gives us the address of our test contract
     */
     function testOwnerIsMsgSender() public {
-        console.log("fundMe.i_fundOwner()", fundMe.i_fundOwner());
-        console.log("address(this)", address(this));
-        console.log("msg.sender", msg.sender);
         assertEq(fundMe.i_fundOwner(), address(this));
     }
 }
