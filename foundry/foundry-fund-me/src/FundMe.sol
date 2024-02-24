@@ -4,19 +4,22 @@ pragma solidity ^0.8.24;
 
 import {PriceConverter} from "./PriceConverter.sol";
 
-error DidNotSendMinEth();
-error NotFundOwner();
-error FundTransferFailed();
+// it's a convention to add the contract name before the error so that it's easier for us to understand where the error is coming from
+error FundMe__DidNotSendMinEth();
+error FundMe__NotFundOwner();
+error FundMe__FundTransferFailed();
 
 contract FundMe {
     using PriceConverter for uint256;
 
     uint256 public constant MIN_USD = 5e18;
 
-    bytes32 public testFallbackTrigger = 0x746573744e756d00000000000000000000000000000000000000000000000000;
+    bytes32 public testFallbackTrigger =
+        0x746573744e756d00000000000000000000000000000000000000000000000000;
     int256 public testFallbackVar = 0;
 
-    address chainlinkAggregatorV3InterfaceAddressEthUsd = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+    address chainlinkAggregatorV3InterfaceAddressEthUsd =
+        0x694AA1769357215DE4FAC081bf1f309aDC325306;
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
 
@@ -41,7 +44,9 @@ contract FundMe {
         }
         funders = new address[](0);
 
-        (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
+        (bool callSuccess, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
 
         if (!callSuccess) {
             revert FundTransferFailed();
