@@ -31,7 +31,7 @@ contract FundMe {
 
     function fund() public payable {
         if (msg.value.getConversionRate() < MIN_USD) {
-            revert DidNotSendMinEth();
+            revert FundMe__DidNotSendMinEth();
         }
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] += msg.value;
@@ -49,13 +49,13 @@ contract FundMe {
         }("");
 
         if (!callSuccess) {
-            revert FundTransferFailed();
+            revert FundMe__FundTransferFailed();
         }
     }
 
     modifier onlyOwner() {
         if (msg.sender != i_fundOwner) {
-            revert NotFundOwner();
+            revert FundMe__NotFundOwner();
         }
         _;
     }
