@@ -21,5 +21,6 @@ contract SimpleStorage {
     address myFirstAdd = 0xaD1C737896cd841766BED18dd052d8244331e1DB;
 
     // NOTE: although uint256 and uint are same, bytes32 and bytes are not.
+    // Strings are actually arrays in Solidity and are very similar to byte arrays
     bytes32 favBytes32 = "hello world!";
 }

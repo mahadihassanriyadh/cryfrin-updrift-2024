@@ -9,10 +9,10 @@ contract SimpleStorage {
     // to make it visible we need to set the state to public
     /*  
         Functions & Variables in Solidity can have 4 kinds of visibility
-        1. public: visible externally and internally. Also creates a getter function for storage/state variables.
-        2. private: only visible in the current contract
-        3. external: only visible externally. Only for functions. - i.e. can only be message -called (via this.func) 
-        4. internal (default): only visible internally, other people can't call.
+        1. public: all can access
+        2. private: can be accessed only from this contract
+        3. external: Cannot be accessed internally, only externally 
+        4. internal (default): only this contract and contracts deriving from it can access
     */
     uint256 public favNum; // 0
 

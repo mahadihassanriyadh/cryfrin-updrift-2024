@@ -31,6 +31,8 @@ contract SimpleStorage {
         2. Calldata (Temporary)
         3. Storage (Permanent)
 
+        Memory vs Calldata: https://ethereum.stackexchange.com/questions/74442/when-should-i-use-calldata-and-when-should-i-use-memory
+
         Memory is useful for storing variables that are only needed temporarily during the execution of a function. These variables may include function arguments, local variables, and dynamic arrays that are created during the execution of a function.
 
         Calldata is useful for passing large amounts of data to a function without having to copy the data into memory, which can be expensive in terms of gas usage. By using calldata, you can avoid the overhead of copying data into memory and reduce the amount of gas needed to execute the function.
