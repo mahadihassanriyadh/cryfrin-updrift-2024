@@ -26,7 +26,7 @@ contract SimpleStorage {
     // data location can only be specified for special types, such as, array, struct or mapping types
     // uint256 is a premitive type but string is an array of bytes in solidity
     /* 
-        Three (2) main places to store data in solidity:
+        Three (3) main places to store data in solidity:
         1. Memory (Temporary)
         2. Calldata (Temporary)
         3. Storage (Permanent)
