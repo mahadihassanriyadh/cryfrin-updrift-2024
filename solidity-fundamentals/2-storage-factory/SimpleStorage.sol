@@ -16,6 +16,7 @@ contract SimpleStorage {
 
     mapping(string => uint256) public nameToFavNumber;
 
+    // virtual keyword is used to tell the compiler that this function can be overridden by a function in a derived contract
     function store(uint256 _favNum) public virtual {
         myFavNum = _favNum;
     }
