@@ -3,7 +3,7 @@
 pragma solidity ^0.8.24;
 
 /* 
-    1. Deploy mocks when we are on a local ganache network / chain
+    1. Deploy mocks when we are on a local envil network / chain
     2. Keep track of different contract addresses across different networks / chains
         For eg:
             - Sepolia ETH/USD
@@ -11,14 +11,18 @@ pragma solidity ^0.8.24;
 */
 
 import {Script} from "forge-std/Script.sol";
+import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
 contract HelperConfig is Script {
     /*  
-        - if we are on a local ganache network, we want to deploy mocks
+        - if we are on a local envil network, we want to deploy mocks
         - otherwise, grab the existing addresses from the live network
     */
 
     NetworkConfig public activeNetworkConfig;
+
+    uint8 public constant DECIMALS = 8;
+    int256 public constant INITIAL_PRICE = 2000e8;
 
     struct NetworkConfig {
         address priceFeed; // ETH/USD price feed address
@@ -30,8 +34,10 @@ contract HelperConfig is Script {
             activeNetworkConfig = getSepoliaEthConfig();
         } else if (block.chainid == 1) {
             activeNetworkConfig = getMainnetEthConfig();
+        } else if (block.chainid == 5777) {
+            activeNetworkConfig = getOrCreateGanacheEthConfig();
         } else {
-            activeNetworkConfig = getGanaheEthConfig();
+            activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
     }
 
@@ -51,7 +57,64 @@ contract HelperConfig is Script {
         return sepoliaConfig;
     }
 
-    function getGanaheEthConfig() public pure returns (NetworkConfig memory) {
-        // price feed address
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
+        // with this we will check if we have already deployed the mock
+        // if we have already deployed the mock, we don't need to deploy it again
+        // we can just return the address of the mock
+        // address(0) is the default value for an address
+        if (activeNetworkConfig.priceFeed != address(0)) {
+            return activeNetworkConfig;
+        }
+
+        /* 
+            This is going to be a little different
+            1. Deploy the mocks
+            2. Return the mock address 
+        */
+
+        // and since we are using this vm keyword, we can't use the pure keyword
+        vm.startBroadcast();
+        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
+            DECIMALS,
+            INITIAL_PRICE
+        );
+        vm.stopBroadcast();
+
+        NetworkConfig memory anvilConfig = NetworkConfig({
+            priceFeed: address(mockPriceFeed)
+        });
+        return anvilConfig;
+    }
+
+    function getOrCreateGanacheEthConfig()
+        public
+        returns (NetworkConfig memory)
+    {
+        // with this we will check if we have already deployed the mock
+        // if we have already deployed the mock, we don't need to deploy it again
+        // we can just return the address of the mock
+        // address(0) is the default value for an address
+        if (activeNetworkConfig.priceFeed != address(0)) {
+            return activeNetworkConfig;
+        }
+
+        /* 
+            This is going to be a little different
+            1. Deploy the mocks
+            2. Return the mock address 
+        */
+
+        // and since we are using this vm keyword, we can't use the pure keyword
+        vm.startBroadcast();
+        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
+            DECIMALS,
+            INITIAL_PRICE
+        );
+        vm.stopBroadcast();
+
+        NetworkConfig memory anvilConfig = NetworkConfig({
+            priceFeed: address(mockPriceFeed)
+        });
+        return anvilConfig;
     }
 }
