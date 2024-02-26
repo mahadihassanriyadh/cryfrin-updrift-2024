@@ -2,13 +2,14 @@
 
 pragma solidity ^0.8.24;
 
-import {PriceConverter} from "./PriceConverter.sol";
+import {PriceConverter} from "./lib/PriceConverter.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // it's a convention to add the contract name before the error so that it's easier for us to understand where the error is coming from
 error FundMe__DidNotSendMinEth();
 error FundMe__NotFundOwner();
 error FundMe__FundTransferFailed();
+error FundMe__FallbackTriggerNotMatched();
 
 contract FundMe {
     using PriceConverter for uint256;
@@ -74,6 +75,8 @@ contract FundMe {
         fund();
         if (bytes32(msg.data) == testFallbackTrigger) {
             testFallbackVar += 1;
+        } else {
+            revert FundMe__FallbackTriggerNotMatched();
         }
     }
 }

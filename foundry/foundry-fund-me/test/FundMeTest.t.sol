@@ -20,7 +20,6 @@ contract FundMeTest is Test {
     }
 
     function testOwnerIsMsgSender() public {
-        // assertEq(fundMe.i_fundOwner(), address(this));
         assertEq(fundMe.i_fundOwner(), msg.sender);
     }
 
