@@ -10,7 +10,7 @@ pragma solidity ^0.8.24;
             - Mainnet ETH/USD 
 */
 
-import {Script} from "forge-std/Script.sol";
+import {Script, console} from "forge-std/Script.sol";
 import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
 contract HelperConfig is Script {
@@ -94,6 +94,7 @@ contract HelperConfig is Script {
         // if we have already deployed the mock, we don't need to deploy it again
         // we can just return the address of the mock
         // address(0) is the default value for an address
+        // In Solidity, the default address, is a special address that's often used to represent a non-set or default address. It's essentially the equivalent of null for addresses.
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
         }
