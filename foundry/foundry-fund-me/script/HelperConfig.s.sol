@@ -62,6 +62,8 @@ contract HelperConfig is Script {
         // if we have already deployed the mock, we don't need to deploy it again
         // we can just return the address of the mock
         // address(0) is the default value for an address
+        // it's like saying:
+        // address = null
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
         }
