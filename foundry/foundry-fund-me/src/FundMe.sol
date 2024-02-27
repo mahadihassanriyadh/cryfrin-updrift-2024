@@ -13,12 +13,12 @@ error FundMe__FallbackTriggerNotMatched();
 
 contract FundMe {
     using PriceConverter for uint256;
-    uint256 public constant MIN_USD = 5e18;
     AggregatorV3Interface private s_priceFeed;
 
-    address[] public s_funders;
-    mapping(address => uint256) public s_addressToAmountFunded;
-
+    // we should make our state variables private whenever possible, as this is more secure and gas efficient
+    uint256 public constant MIN_USD = 5e18;
+    address[] private s_funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
     address public immutable i_fundOwner;
 
     constructor(address priceFeed) {
@@ -69,5 +69,20 @@ contract FundMe {
     // when someone sends ether to this contract directly with some data
     fallback() external payable {
         fund();
+    }
+
+    /* 
+        #####################################################
+        ########## View / Pure Functions (Getters) ##########
+        #####################################################
+    */
+    function getAddressToAmountFunded(
+        address funderAddress
+    ) external view returns (uint256) {
+        return s_addressToAmountFunded[funderAddress];
+    }
+
+    function getFunder(uint256 idx) external view returns (address) {
+        return s_funders[idx];
     }
 }
