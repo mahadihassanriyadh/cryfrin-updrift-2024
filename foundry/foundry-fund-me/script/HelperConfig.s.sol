@@ -19,14 +19,13 @@ contract HelperConfig is Script {
         - otherwise, grab the existing addresses from the live network
     */
 
+    struct NetworkConfig {
+        address priceFeed; // ETH/USD price feed address
+    }
     NetworkConfig public activeNetworkConfig;
 
     uint8 public constant DECIMALS = 8;
     int256 public constant INITIAL_PRICE = 2000e8;
-
-    struct NetworkConfig {
-        address priceFeed; // ETH/USD price feed address
-    }
 
     constructor() {
         // every network has a unique chainid
@@ -88,26 +87,15 @@ contract HelperConfig is Script {
         return anvilConfig;
     }
 
+    // similar to the getOrCreateAnvilEthConfig function
     function getOrCreateGanacheEthConfig()
         public
         returns (NetworkConfig memory)
     {
-        // with this we will check if we have already deployed the mock
-        // if we have already deployed the mock, we don't need to deploy it again
-        // we can just return the address of the mock
-        // address(0) is the default value for an address
-        // In Solidity, the default address, is a special address that's often used to represent a non-set or default address. It's essentially the equivalent of null for addresses.
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
         }
 
-        /* 
-            This is going to be a little different
-            1. Deploy the mocks
-            2. Return the mock address 
-        */
-
-        // and since we are using this vm keyword, we can't use the pure keyword
         vm.startBroadcast();
         MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
             DECIMALS,
