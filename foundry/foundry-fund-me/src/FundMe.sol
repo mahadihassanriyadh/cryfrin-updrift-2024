@@ -16,14 +16,8 @@ contract FundMe {
     uint256 public constant MIN_USD = 5e18;
     AggregatorV3Interface private s_priceFeed;
 
-    bytes32 public testFallbackTrigger =
-        0x746573744e756d00000000000000000000000000000000000000000000000000;
-    int256 public testFallbackVar = 0;
-    address chainlinkAggregatorV3InterfaceAddressEthUsd =
-        0x694AA1769357215DE4FAC081bf1f309aDC325306;
-
-    address[] public funders;
-    mapping(address => uint256) public addressToAmountFunded;
+    address[] public s_funders;
+    mapping(address => uint256) public s_addressToAmountFunded;
 
     address public immutable i_fundOwner;
 
@@ -36,16 +30,16 @@ contract FundMe {
         if (msg.value.getConversionRate(s_priceFeed) < MIN_USD) {
             revert FundMe__DidNotSendMinEth();
         }
-        funders.push(msg.sender);
-        addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value;
     }
 
     function withdraw() public onlyOwner {
-        for (uint256 funderIdx = 0; funderIdx < funders.length; funderIdx++) {
-            address funder = funders[funderIdx];
-            addressToAmountFunded[funder] = 0;
+        for (uint256 funderIdx = 0; funderIdx < s_funders.length; funderIdx++) {
+            address funder = s_funders[funderIdx];
+            s_addressToAmountFunded[funder] = 0;
         }
-        funders = new address[](0);
+        s_funders = new address[](0);
 
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
@@ -67,16 +61,13 @@ contract FundMe {
         _;
     }
 
+    // when someone sends ether to this contract directly without any data
     receive() external payable {
         fund();
     }
 
+    // when someone sends ether to this contract directly with some data
     fallback() external payable {
         fund();
-        if (bytes32(msg.data) == testFallbackTrigger) {
-            testFallbackVar += 1;
-        } else {
-            revert FundMe__FallbackTriggerNotMatched();
-        }
     }
 }
