@@ -63,18 +63,15 @@ contract FundMeTest is Test {
     }
 
     function testWithdrawWithASingleFunder() public funded {
-        // Arrange: First arrange or setup the test
-        // balance of the owner before the withdraw
+        // Arrange
         uint256 startingOwnerBalance = fundMe.getOwner().balance;
-        // balance of the contract before the withdraw
         uint256 startingContractBalance = address(fundMe).balance;
 
-        // Act: Then do the actions we want to test
-        // call the withdraw function as the owner
+        // Act
         vm.prank(fundMe.getOwner());
         fundMe.withdraw();
 
-        // Assert: And finally assert the test
+        // Assert
         uint256 endingOwnerBalance = fundMe.getOwner().balance;
         uint256 endingContractBalance = address(fundMe).balance;
 
@@ -89,19 +86,7 @@ contract FundMeTest is Test {
         // Arrange
         uint160 numOfFunders = 10;
         uint160 startingFunderIdx = 1;
-        // The reason we are starting from 1 is, because sometimes the address(0) will reverse and won't let us do stuff with it
         for (uint160 i = startingFunderIdx; i < numOfFunders; i++) {
-            /* 
-                We could do something like this:
-                1. vm.prank(USER); // create a new user
-                2. vm.deal(USER, 1e18); // give the user some funds
-
-                However, foundry gives us another cheatcode `hoax` which is a combination of `prank` and `deal`
-                So we can do this instead:
-                    hoax(address, value)
-            */
-            // previous we have seen we can create an address with address(0)
-            // we can do this with other numbers as well, just the number has to be in uint160 as uint160 has the same byte size as address
             hoax(address(i), SEND_VALUE);
             fundMe.fund{value: SEND_VALUE}();
         }
@@ -110,20 +95,18 @@ contract FundMeTest is Test {
         uint256 startingContractBalance = address(fundMe).balance;
 
         // Act
-        /* 
-            vm.prank(fundMe.getOwner());
-            fundMe.withdraw(); 
-        */
-        // We can do the above two lines, but we can also do this:
         vm.startPrank(fundMe.getOwner());
         fundMe.withdraw();
-        vm.stopPrank();       
+        vm.stopPrank();
 
         // Assert
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingContractBalance = address(fundMe).balance;
+
         assertEq(
-            fundMe.getOwner().balance,
+            endingOwnerBalance,
             startingOwnerBalance + startingContractBalance
         );
-        assertEq(address(fundMe).balance, 0);
+        assertEq(endingContractBalance, 0);
     }
 }
