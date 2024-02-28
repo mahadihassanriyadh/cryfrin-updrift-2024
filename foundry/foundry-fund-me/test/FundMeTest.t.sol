@@ -27,7 +27,7 @@ contract FundMeTest is Test {
     }
 
     function testOwnerIsMsgSender() public {
-        assertEq(fundMe.i_fundOwner(), msg.sender);
+        assertEq(fundMe.getOwner(), msg.sender);
     }
 
     function testPriceFeedVersionIsAccurate() public {
@@ -51,12 +51,7 @@ contract FundMeTest is Test {
         assertEq(amountFunded, SEND_VALUE);
     }
 
-    // the reason vm.prank we used in the previous test won't cause any problem here is, how the test works here.
-    // so every time what happens is,
-    // 1. the setUp() function is called
-    // 2. a test function is called
-    // 3. repeat 1 and 2 for all the test functions
-    function testAddFundersToArrayOfFunders() public funded{
+    function testAddFundersToArrayOfFunders() public funded {
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
     }
@@ -65,5 +60,25 @@ contract FundMeTest is Test {
         vm.expectRevert(); // the next line should revert, it will skip the vm.prank(USER) line, it only works for tx
         vm.prank(USER);
         fundMe.withdraw();
+    }
+
+    function testWithdrawWithASingleFunder() public funded {
+        // Arrange: First arrange or setup the test
+        // balance of the owner before the withdraw
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        // balance of the contract before the withdraw
+        uint256 startingContractBalance = address(fundMe).balance;
+
+        // Act: Then do the actions we want to test
+        // call the withdraw function as the owner
+        vm.prank(fundMe.getOwner());
+        fundMe.withdraw();
+
+        // Assert: And finally assert the test
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingContractBalance = address(fundMe).balance;
+        
+        assertEq(endingOwnerBalance, startingOwnerBalance + startingContractBalance);
+        assertEq(endingContractBalance, 0);
     }
 }

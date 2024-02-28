@@ -19,7 +19,7 @@ contract FundMe {
     uint256 public constant MIN_USD = 5e18;
     address[] private s_funders;
     mapping(address => uint256) private s_addressToAmountFunded;
-    address public immutable i_fundOwner;
+    address private immutable i_fundOwner;
 
     constructor(address priceFeed) {
         i_fundOwner = msg.sender;
@@ -84,5 +84,9 @@ contract FundMe {
 
     function getFunder(uint256 idx) external view returns (address) {
         return s_funders[idx];
+    }
+
+    function getOwner() external view returns (address) {
+        return i_fundOwner;
     }
 }
