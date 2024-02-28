@@ -40,22 +40,30 @@ contract FundMeTest is Test {
         fundMe.fund{value: 1e8}(); // sending 0 wei or 1e8 wei which is <= 5$, should revert
     }
 
-    function testFundUpdatesFundedDataStructure() public {
-        vm.prank(USER); // the next Tx will be from the fake user
+    modifier funded() {
+        vm.prank(USER);
         fundMe.fund{value: SEND_VALUE}();
+        _;
+    }
+
+    function testFundUpdatesFundedDataStructure() public funded {
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
         assertEq(amountFunded, SEND_VALUE);
     }
 
-    // the reason vm.prank we used in the previous test won't cause any problem here is, how the test works here. 
+    // the reason vm.prank we used in the previous test won't cause any problem here is, how the test works here.
     // so every time what happens is,
     // 1. the setUp() function is called
     // 2. a test function is called
     // 3. repeat 1 and 2 for all the test functions
-    function testAddFundersToArrayOfFunders() public {
-        vm.prank(USER);
-        fundMe.fund{value: SEND_VALUE}();
+    function testAddFundersToArrayOfFunders() public funded{
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
+    }
+
+    function testOnlyOwnerCanWithdraw() public funded {
+        vm.expectRevert(); // the next line should revert, it will skip the vm.prank(USER) line, it only works for tx
+        vm.prank(USER);
+        fundMe.withdraw();
     }
 }
