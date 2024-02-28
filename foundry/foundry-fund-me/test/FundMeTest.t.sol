@@ -43,24 +43,19 @@ contract FundMeTest is Test {
     function testFundUpdatesFundedDataStructure() public {
         vm.prank(USER); // the next Tx will be from the fake user
         fundMe.fund{value: SEND_VALUE}();
-        /* 
-            Using sender.msg vs address(this) is getting a little confusing
-            Foundry gives us the ability to do this in a more controlled way, by making fake users
-            1. Create a fakeuser using
-                address USER = makeAddr("User"); 
-                - this will create a fake user and return the address
-                - this makeAddr is part of forge-std library
-            2. Let the test know the next Tx will be from the fake user
-                -  this is a cheatcode of foundry and only available in foundry test environment
-                vm.prank(USER);
-            3. Now, the next Tx will be from the fake user
-            4. But the fake user doesn't have any funds, so we need to give it some funds
-                - We can use the deal to set some balance for the fake user
-                - this is also a cheatcode of foundry and only available in foundry test environment
-                vm.deal(USER, STARTING_BALANCE);
-        */
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
-        console.log("amountFunded", amountFunded);
         assertEq(amountFunded, SEND_VALUE);
+    }
+
+    // the reason vm.prank we used in the previous test won't cause any problem here is, how the test works here. 
+    // so every time what happens is,
+    // 1. the setUp() function is called
+    // 2. a test function is called
+    // 3. repeat 1 and 2 for all the test functions
+    function testAddFundersToArrayOfFunders() public {
+        vm.prank(USER);
+        fundMe.fund{value: SEND_VALUE}();
+        address funder = fundMe.getFunder(0);
+        assertEq(funder, USER);
     }
 }
