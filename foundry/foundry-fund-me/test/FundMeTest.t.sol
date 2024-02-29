@@ -13,6 +13,7 @@ contract FundMeTest is Test {
     address USER = makeAddr("User");
     uint256 constant SEND_VALUE = 5 ether; // 1e17 wei
     uint256 constant STARTING_BALANCE = 8e18; // 8 ether
+    uint256 constant GAS_PRICE = 1; // 1 wei
 
     function setUp() external {
         DeployFundMe deployFundMe = new DeployFundMe();
@@ -95,9 +96,20 @@ contract FundMeTest is Test {
         uint256 startingContractBalance = address(fundMe).balance;
 
         // Act
-        vm.startPrank(fundMe.getOwner());
+        uint256 gasStart = gasleft(); // gasLeft() is a built-in solidify function
+        vm.txGasPrice(GAS_PRICE);
+        /* 
+            vm.startPrank(fundMe.getOwner());
+            fundMe.withdraw();
+            vm.stopPrank(); 
+        */
+        // this is the same as the above 3 lines
+        vm.prank(fundMe.getOwner());
         fundMe.withdraw();
-        vm.stopPrank();
+
+        uint256 gasEnd = gasleft();
+        uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice; // tx.gasprice is a built-in solidify variable that gives us the current gas price
+        console.log("Gas used: ", gasUsed);
 
         // Assert
         uint256 endingOwnerBalance = fundMe.getOwner().balance;
