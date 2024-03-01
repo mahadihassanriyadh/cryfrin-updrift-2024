@@ -158,6 +158,7 @@ contract FundMeTest is Test {
             endingOwnerBalance,
             startingOwnerBalance + startingContractBalance
         );
+        
         assertEq(endingContractBalance, 0);
     }
 }
