@@ -3,6 +3,13 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
-remappings = ["@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/"]
+remappings = [
+    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
+]
+
+# ffi = true # ❗️Caution: enabling this would allow foundry to run commands directly on your machine. So we should try to keep this disabled as much as possible. But it is important for us to know what it is, how to use it and when we need it. Especially for something like this, to get our most recent deployments.
+
+# instead of ffi = true, we can use the following settings
+fs_permissions = [{ access = "read", path = "./broadcast" }]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
