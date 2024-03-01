@@ -10,7 +10,7 @@ import {FundMe} from "../src/FundMe.sol";
 // A Withdraw Script
 
 contract FundFundMe is Script {
-    uint256 constant SEND_VALUE = 5 ether;
+    uint256 constant SEND_VALUE = 2 ether;
 
     function fundFundMe(address _mostRecentDeployed) public {
         vm.startBroadcast();
@@ -39,4 +39,19 @@ contract FundFundMe is Script {
     }
 }
 
-contract WithdrawFundMe is Script {}
+contract WithdrawFundMe is Script {
+    function withdrawFundMe(address _mostRecentDeployed) public {
+        vm.startBroadcast();
+        FundMe(payable(_mostRecentDeployed)).withdraw();
+        vm.stopBroadcast();
+        console.log("Withdraw FundMe balance!");
+    }
+
+    function run() external {
+        address contractAddress = DevOpsTools.get_most_recent_deployment(
+            "FundMe",
+            block.chainid
+        );
+        withdrawFundMe(contractAddress);
+    }
+}
