@@ -34,6 +34,23 @@ contract FundMe {
         s_addressToAmountFunded[msg.sender] += msg.value;
     }
 
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
+        for (uint256 funderIdx = 0; funderIdx < fundersLength; funderIdx++) {
+            address funder = s_funders[funderIdx];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+
+        (bool callSuccess, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+
+        if (!callSuccess) {
+            revert FundMe__FundTransferFailed();
+        }
+    }
+
     function withdraw() public onlyOwner {
         for (uint256 funderIdx = 0; funderIdx < s_funders.length; funderIdx++) {
             address funder = s_funders[funderIdx];

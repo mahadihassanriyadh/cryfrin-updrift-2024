@@ -121,4 +121,43 @@ contract FundMeTest is Test {
         );
         assertEq(endingContractBalance, 0);
     }
+
+    function testWithdrawFromMultipleFundersCheaper() public funded {
+        // Arrange
+        uint160 numOfFunders = 10;
+        uint160 startingFunderIdx = 1;
+        for (uint160 i = startingFunderIdx; i < numOfFunders; i++) {
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingContractBalance = address(fundMe).balance;
+
+        // Act
+        uint256 gasStart = gasleft(); // gasLeft() is a built-in solidify function
+        vm.txGasPrice(GAS_PRICE);
+        /* 
+            vm.startPrank(fundMe.getOwner());
+            fundMe.withdraw();
+            vm.stopPrank(); 
+        */
+        // this is the same as the above 3 lines
+        vm.prank(fundMe.getOwner());
+        fundMe.cheaperWithdraw();
+
+        uint256 gasEnd = gasleft();
+        uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice; // tx.gasprice is a built-in solidify variable that gives us the current gas price
+        console.log("Gas used: ", gasUsed);
+
+        // Assert
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingContractBalance = address(fundMe).balance;
+
+        assertEq(
+            endingOwnerBalance,
+            startingOwnerBalance + startingContractBalance
+        );
+        assertEq(endingContractBalance, 0);
+    }
 }
