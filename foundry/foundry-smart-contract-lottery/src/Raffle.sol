@@ -11,13 +11,20 @@ pragma solidity ^0.8.24;
  */
 
 contract Raffle {
+    error Raffle__NotEnoughEthSent();
+
     uint256 private immutable i_entranceFee;
 
     constructor(uint256 _entranceFee) {
         i_entranceFee = _entranceFee;
     }
 
-    function enterRaffle() public payable {}
+    function enterRaffle() external payable {
+        // more gas efficient than require
+        if (msg.value < i_entranceFee) {
+            revert Raffle__NotEnoughEthSent();
+        }
+    }
 
     function pickWinner() public {}
 
@@ -26,7 +33,40 @@ contract Raffle {
         ####### Getter Functions ✅ #######
         ###################################
     */
-   function getEntranceFee() external view returns (uint256) {
-       return i_entranceFee;
-   }
+    function getEntranceFee() external view returns (uint256) {
+        return i_entranceFee;
+    }
 }
+
+/*  
+    ####################################################
+    ####### Code Layout & Order (Style Guide) 🎨 #######
+    ####################################################
+
+    ⭕️ Contract elements should be laid out in the following order:
+        - Pragma statements
+        - Import statements
+        - Events
+        - Errors
+        - Interfaces
+        - Libraries
+        - Contracts
+
+    ⭕️ Inside each contract, library or interface, use the following order:
+        - Type declarations
+        - State variables
+        - Events
+        - Errors
+        - Modifiers
+        - Functions
+
+    ⭕️ Layout of Functions:
+        - constructor
+        - receive function (if exists)
+        - fallback function (if exists)
+        - external
+        - public
+        - internal
+        - private
+        - view & pure functions 
+*/
