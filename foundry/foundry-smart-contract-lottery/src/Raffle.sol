@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 
 // import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 
@@ -15,11 +16,17 @@ import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBa
  * @dev Implements chainlink VRF for random number generation.
  */
 
-contract Raffle is VRFConsumerBaseV2 {
+contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     error Raffle__NotEnoughEthSent();
     error Raffle__NotEnoughTimePassed();
     error Raffle__TransferFailed();
     error Raffle__RaffleNotOpen();
+    error Raffle__UpkeepNotNeeded(
+        uint256 balance,
+        uint256 playersLength,
+        RaffleState raffleState,
+        uint256 lastTimeStamp
+    );
 
     /* ############ Type Declarations ############ */
     // In solidity, enums are converted into integers
@@ -85,15 +92,56 @@ contract Raffle is VRFConsumerBaseV2 {
         emit EnteredRaffle(msg.sender);
     }
 
+    // When is the winner supposed to be picked?
+    /**
+     * @dev This is the function that the Chainlink Automation nodes call to see if it's time to perform an upkeep.
+     * The following should be true for this to return true:
+     * 1. The time interval has passed between the last raffle and now
+     * 2. The raffle is in the OPEN state
+     * 3. The contract has ETH (aka, players have entered the raffle)
+     * 4. (Implicit) The subscription is funded with LINK
+     * @dev This checkUpkeep will be called by the Chainlink nodes to see if it's time to perform an upkeep. As the function is a view function, it doesn't change the state of the contract, so no transaction is needed to call this function.
+     */
+    // if our function requires a input parameter and for the chain link nodes to recognize this function, we need an input parameter, but we are not going to use that parameter, then we can just ignore it by wrapping it in a comment
+    function checkUpkeep(
+        bytes memory /* checkData */
+    )
+        public
+        view
+        override
+        returns (bool upkeepNeeded, bytes memory /* performData */)
+    {
+        // check if enough time has passed
+        bool timeHasPassed = block.timestamp - s_lastTimeStamp >= i_interval;
+        bool isOpen = s_raffleState == RaffleState.OPEN;
+        bool hasBalance = address(this).balance > 0;
+        bool hasPlayers = s_players.length > 0;
+        upkeepNeeded = (timeHasPassed && isOpen && hasBalance && hasPlayers);
+
+        /*  
+            - it wouldn't be a problem if we didn't return anything, as we have named the return variables in the function signature, it would automatically return the value of upkeepNeeded
+            - but it's a good practice to be explicit about what we are returning
+            So we will:
+                1. return the value of upkeepNeeded
+                2. return an empty bytes array as performData (as we don't need to return anything here)
+        */
+        return (upkeepNeeded, "0x0");
+    }
+
     /*  
         1. get a random number
         2. use the random number to pick a winner
         3. be automatically called
     */
-    function pickWinner() external {
-        // check if enough time has passed
-        if (block.timestamp - s_lastTimeStamp < i_interval) {
-            revert Raffle__NotEnoughTimePassed();
+    function performUpkeep(bytes calldata /* performData */) external override {
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                RaffleState(s_raffleState),
+                s_lastTimeStamp
+            );
         }
 
         s_raffleState = RaffleState.CALCULATING;
@@ -104,7 +152,7 @@ contract Raffle is VRFConsumerBaseV2 {
                 1. Request a random number -> This is a outgoing request transaction to Chainlink VRF
                 2. Get the random number (Callback Request) <- This is a incoming recieving transaction coming from Chainlink VRF
         */
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+        i_vrfCoordinator.requestRandomWords(
             i_keyHash, // gas lane
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
@@ -114,7 +162,7 @@ contract Raffle is VRFConsumerBaseV2 {
     }
 
     function fulfillRandomWords(
-        uint256 requestId,
+        uint256 /* requestId */,
         uint256[] memory randomWords
     ) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
