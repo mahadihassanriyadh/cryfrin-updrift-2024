@@ -18,6 +18,15 @@ import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBa
 contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughEthSent();
     error Raffle__NotEnoughTimePassed();
+    error Raffle__TransferFailed();
+    error Raffle__RaffleNotOpen();
+
+    /* ############ Type Declarations ############ */
+    // In solidity, enums are converted into integers
+    enum RaffleState {
+        OPEN, // 0
+        CALCULATING // 1
+    }
 
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_OF_WORDS = 1;
@@ -33,6 +42,8 @@ contract Raffle is VRFConsumerBaseV2 {
     // as one of the players will be paid, so the addresses need to payable
     address payable[] private s_players;
     uint256 private s_lastTimeStamp;
+    address private s_recentWinner;
+    RaffleState private s_raffleState;
 
     /*  
         ###############################
@@ -55,11 +66,16 @@ contract Raffle is VRFConsumerBaseV2 {
         i_keyHash = _keyHash;
         i_subscriptionId = _subscriptionId;
         i_callbackGasLimit = _callbackGasLimit;
+
+        s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
     }
 
     function enterRaffle() external payable {
         // more gas efficient than require
+        if (s_raffleState != RaffleState.OPEN) {
+            revert Raffle__RaffleNotOpen();
+        }
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughEthSent();
         }
@@ -79,6 +95,8 @@ contract Raffle is VRFConsumerBaseV2 {
             revert Raffle__NotEnoughTimePassed();
         }
 
+        s_raffleState = RaffleState.CALCULATING;
+
         /*  
             - Till now all we have been doing was atomic. Everything was happening in one transaction.
             - Now we need to do two transactions when using Chainlink VRF:
@@ -94,15 +112,19 @@ contract Raffle is VRFConsumerBaseV2 {
         );
     }
 
-    function fulFillRandomWords(
+    function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        // Implementation goes here
-        // require(s_requests[_requestId].exists, "request not found");
-        // s_requests[_requestId].fulfilled = true;
-        // s_requests[_requestId].randomWords = _randomWords;
-        // emit RequestFulfilled(_requestId, _randomWords);
+        uint256 indexOfWinner = randomWords[0] % s_players.length;
+        address payable winner = s_players[indexOfWinner];
+        s_recentWinner = winner;
+        s_raffleState = RaffleState.OPEN;
+        
+        (bool success, ) = winner.call{value: address(this).balance}("");
+        if (!success) {
+            revert Raffle__TransferFailed();
+        }
     }
 
     /*  
@@ -120,20 +142,13 @@ contract Raffle is VRFConsumerBaseV2 {
     ####### Code Layout & Order (Style Guide) 🎨 #######
     ####################################################
 
-    ⭕️ Contract elements should be laid out in the following order:
-        - Pragma statements
+    ⭕️ Contract Layout:
+        - Pragma statements (Version)
         - Import statements
-        - Events
-        - Errors
-        - Interfaces
-        - Libraries
-        - Contracts
-
-    ⭕️ Inside each contract, library or interface, use the following order:
+        - Interfaces, Libraries, Contracts
         - Type declarations
         - State variables
         - Events
-        - Errors
         - Modifiers
         - Functions
 
