@@ -12,11 +12,14 @@ pragma solidity ^0.8.24;
 
 contract Raffle {
     error Raffle__NotEnoughEthSent();
+    error Raffle__NotEnoughTimePassed();
 
     uint256 private immutable i_entranceFee;
-
+    // minimum time interval between two raffles in seconds
+    uint256 private immutable i_interval;
     // as one of the players will be paid, so the addresses need to payable
     address payable[] private s_players;
+    uint256 private s_lastTimeStamp;
 
     /*  
         ###############################
@@ -25,8 +28,10 @@ contract Raffle {
     */
     event EnteredRaffle(address indexed player);
 
-    constructor(uint256 _entranceFee) {
+    constructor(uint256 _entranceFee, uint256 _interval) {
         i_entranceFee = _entranceFee;
+        i_interval = _interval;
+        s_lastTimeStamp = block.timestamp;
     }
 
     function enterRaffle() external payable {
@@ -39,7 +44,24 @@ contract Raffle {
         emit EnteredRaffle(msg.sender);
     }
 
-    function pickWinner() public {}
+    /*  
+        1. get a random number
+        2. use the random number to pick a winner
+        3. be automatically called
+    */
+    function pickWinner() external {
+        // check if enough time has passed
+        if (block.timestamp - s_lastTimeStamp < i_interval) {
+            revert Raffle__NotEnoughTimePassed();
+        }
+
+        /*  
+            - Till now we have only done one transaction on each request.
+            - Now we need to do two transactions when using Chainlink VRF:
+                1. Get a random number (Request a random number from Chainlink VRF) -> This is a outgoing request transaction
+                2. Use the random number to pick a winner (Recieving the number from Chainlink) <- This is a incoming request transaction
+        */
+    }
 
     /*  
         ###################################
