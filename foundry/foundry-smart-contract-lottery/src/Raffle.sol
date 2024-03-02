@@ -2,6 +2,11 @@
 
 pragma solidity ^0.8.24;
 
+import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+
+// import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+
 // NatSpec Format: Solidity contracts can use a special form of comments to provide rich documentation for functions, return variables and more. This special form is named the Ethereum Natural Language Specification Format (NatSpec). [https://docs.soliditylang.org/en/latest/natspec-format.html]
 /**
  * @title A Simple Raffle Contract
@@ -10,13 +15,21 @@ pragma solidity ^0.8.24;
  * @dev Implements chainlink VRF for random number generation.
  */
 
-contract Raffle {
+contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughEthSent();
     error Raffle__NotEnoughTimePassed();
+
+    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint32 private constant NUM_OF_WORDS = 1;
 
     uint256 private immutable i_entranceFee;
     // minimum time interval between two raffles in seconds
     uint256 private immutable i_interval;
+    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    bytes32 private immutable i_keyHash; // gas lane
+    uint64 private immutable i_subscriptionId;
+    uint32 private immutable i_callbackGasLimit;
+
     // as one of the players will be paid, so the addresses need to payable
     address payable[] private s_players;
     uint256 private s_lastTimeStamp;
@@ -28,9 +41,20 @@ contract Raffle {
     */
     event EnteredRaffle(address indexed player);
 
-    constructor(uint256 _entranceFee, uint256 _interval) {
+    constructor(
+        uint256 _entranceFee,
+        uint256 _interval,
+        address _vrfCoordinator,
+        bytes32 _keyHash,
+        uint64 _subscriptionId,
+        uint32 _callbackGasLimit
+    ) VRFConsumerBaseV2(_vrfCoordinator) {
         i_entranceFee = _entranceFee;
         i_interval = _interval;
+        i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
+        i_keyHash = _keyHash;
+        i_subscriptionId = _subscriptionId;
+        i_callbackGasLimit = _callbackGasLimit;
         s_lastTimeStamp = block.timestamp;
     }
 
@@ -56,11 +80,29 @@ contract Raffle {
         }
 
         /*  
-            - Till now we have only done one transaction on each request.
+            - Till now all we have been doing was atomic. Everything was happening in one transaction.
             - Now we need to do two transactions when using Chainlink VRF:
-                1. Get a random number (Request a random number from Chainlink VRF) -> This is a outgoing request transaction
-                2. Use the random number to pick a winner (Recieving the number from Chainlink) <- This is a incoming request transaction
+                1. Request a random number -> This is a outgoing request transaction to Chainlink VRF
+                2. Get the random number (Callback Request) <- This is a incoming recieving transaction coming from Chainlink VRF
         */
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_keyHash, // gas lane
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_OF_WORDS
+        );
+    }
+
+    function fulFillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {
+        // Implementation goes here
+        // require(s_requests[_requestId].exists, "request not found");
+        // s_requests[_requestId].fulfilled = true;
+        // s_requests[_requestId].randomWords = _randomWords;
+        // emit RequestFulfilled(_requestId, _randomWords);
     }
 
     /*  
