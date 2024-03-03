@@ -6,11 +6,13 @@ import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {Raffle} from "../src/Raffle.sol";
 import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
+import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() public returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
-        (, , address vrfCoordinator, , , ) = helperConfig.activeNetworkConfig();
+        (, , address vrfCoordinator, , , , ) = helperConfig
+            .activeNetworkConfig();
         return createSubscription(vrfCoordinator);
     }
 
@@ -29,5 +31,61 @@ contract CreateSubscription is Script {
         return subId;
     }
 
-    function run() external {}
+    function run() external returns (uint64) {
+        return createSubscriptionUsingConfig();
+    }
+}
+
+contract FundSubscription is Script {
+    uint96 public constant FUND_AMOUNT = 3 ether; // 3 LINK
+
+    function fundSubscriptionUsingConfig() public {
+        HelperConfig helperConfig = new HelperConfig();
+        (
+            ,
+            ,
+            address vrfCoordinator,
+            ,
+            uint64 subscriptionId,
+            ,
+            address link
+        ) = helperConfig.activeNetworkConfig();
+
+        fundSubscription(vrfCoordinator, subscriptionId, link);
+    }
+
+    function fundSubscription(
+        address vrfCoordinator,
+        uint64 subscriptionId,
+        address link
+    ) public {
+        console.log("Funding subscription on Subcription Id: ", subscriptionId);
+        console.log("Using vrfCoordinator: ", vrfCoordinator);
+        console.log("Using link token: ", link);
+
+        // anvil chain id: 31337
+        if (block.chainid == 31337) {
+            vm.startBroadcast();
+            // this fundSubscription() function only exists in the mock VRFCoordinatorV2Mock, not the real VRFCoordinatorV2
+            VRFCoordinatorV2Mock(vrfCoordinator).fundSubscription(
+                subscriptionId,
+                FUND_AMOUNT
+            );
+            vm.stopBroadcast();
+        } else {
+            // real testnet or mainnet
+            vm.startBroadcast();
+            // for now don't worry about the transferAndCall, we can come back to it after we have understood abi encoding
+            LinkToken(link).transferAndCall(
+                vrfCoordinator,
+                FUND_AMOUNT,
+                abi.encode(subscriptionId)
+            );
+            vm.stopBroadcast();
+        }
+    }
+
+    function run() external {
+        fundSubscriptionUsingConfig();
+    }
 }
