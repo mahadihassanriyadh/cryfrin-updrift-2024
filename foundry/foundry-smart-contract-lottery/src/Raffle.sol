@@ -24,8 +24,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     error Raffle__UpkeepNotNeeded(
         uint256 balance,
         uint256 playersLength,
-        RaffleState raffleState,
-        uint256 lastTimeStamp
+        RaffleState raffleState
     );
 
     /* ############ Type Declarations ############ */
@@ -139,8 +138,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
                 s_players.length,
-                RaffleState(s_raffleState),
-                s_lastTimeStamp
+                RaffleState(s_raffleState)
             );
         }
 

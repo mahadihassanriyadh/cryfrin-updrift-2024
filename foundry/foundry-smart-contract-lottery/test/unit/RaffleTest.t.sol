@@ -126,10 +126,10 @@ contract RaffleTest is Test {
 
     /*  
         #####################################
-        ########## checkUpKeep 🔼 ##########
+        ########## checkUpkeep 🔼 ##########
         #####################################
     */
-    function testCheckUpKeepReturnsFalseIfEnoughTimeHasntPassed() public {
+    function testCheckUpkeepReturnsFalseIfEnoughTimeHasntPassed() public {
         // Arrange
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
@@ -142,7 +142,7 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpKeepReturnsFalseIfRaffleNotOpen() public {
+    function testCheckUpkeepReturnsFalseIfRaffleNotOpen() public {
         // Arrange
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
@@ -157,7 +157,7 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpKeepReturnsFalseIfItHasNoBalance() public {
+    function testCheckUpkeepReturnsFalseIfItHasNoBalance() public {
         // Arrange
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
@@ -169,7 +169,7 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpKeepReturnsFalseIfItHasNoPlayers() public {
+    function testCheckUpkeepReturnsFalseIfItHasNoPlayers() public {
         // Arrange
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
@@ -181,7 +181,7 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpKeepReturnsTrueIfAllParametersAreGood() public {
+    function testCheckUpkeepReturnsTrueIfAllParametersAreGood() public {
         // Arrange
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
@@ -193,5 +193,40 @@ contract RaffleTest is Test {
 
         // Assert
         assert(upkeepNeeded);
+    }
+
+    /*  
+        ######################################
+        ########## performUpkeep 🎤 ##########
+        ######################################
+    */
+    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsTrue() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+
+        // Act / Assert
+        // the test shall pass if the performUpkeep function does not revert
+        // and as we have already tested the checkUpkeep function, we know that it will return true, so the performUpkeep function should not revert
+        raffle.performUpkeep("");
+    }
+
+    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsFalse() public {
+        // Arrange
+        uint256 currentBalance = 0;
+        uint256 numOfPlayers = 0;
+
+        // Act / Assert
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Raffle.Raffle__UpkeepNotNeeded.selector,
+                currentBalance,
+                numOfPlayers,
+                Raffle.RaffleState.OPEN
+            )
+        );
+        raffle.performUpkeep("");
     }
 }
