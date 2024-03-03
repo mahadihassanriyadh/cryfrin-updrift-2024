@@ -41,10 +41,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     uint256 private immutable i_entranceFee;
     // minimum time interval between two raffles in seconds
     uint256 private immutable i_interval;
-    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private immutable i_keyHash; // gas lane
     uint64 private immutable i_subscriptionId;
     uint32 private immutable i_callbackGasLimit;
+    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
 
     // as one of the players will be paid, so the addresses need to payable
     address payable[] private s_players;
@@ -190,6 +190,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     */
     function getEntranceFee() external view returns (uint256) {
         return i_entranceFee;
+    }
+
+    function getRaffleState() external view returns (RaffleState) {
+        return s_raffleState;
     }
 }
 
