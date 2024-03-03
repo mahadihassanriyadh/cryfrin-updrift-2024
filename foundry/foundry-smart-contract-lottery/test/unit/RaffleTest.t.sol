@@ -101,4 +101,24 @@ contract RaffleTest is Test {
         // Assert
         raffle.enterRaffle{value: entranceFee}();
     }
+
+    function testCantEnterWhenRaffleIsCalculating() public {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+
+        // now we need to kick of a performUpkeep to get the raffle into the calculating state
+        // in order to do this we need our checkUpkeep to return true
+        // first thing we need to do is pass enough time
+        // foundry gives us some cheats to do this fairly easily when we are working on a local chain, we can set the block.timestamp ourselves
+        vm.warp(block.timestamp + interval + 1);
+        // we don't have to do vm.roll() but we are just doing an extra block in our test
+        vm.roll(block.number + 1);
+
+        raffle.performUpkeep("");
+
+        // now we shouldn't be able to enter the raffle
+        vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+    }
 }
