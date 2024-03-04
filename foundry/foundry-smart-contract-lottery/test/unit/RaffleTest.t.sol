@@ -29,6 +29,25 @@ contract RaffleTest is Test {
     */
     event EnteredRaffle(address indexed player);
 
+    /*  
+        ##################################
+        ########## Modifiers 🙌 ##########
+        ##################################
+    */
+    modifier raffleEnteredAndTimePassed() {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+
+        // now we need to kick of a performUpkeep to get the raffle into the calculating state
+        // in order to do this we need our checkUpkeep to return true
+        // first thing we need to do is pass enough time
+        // foundry gives us some cheats to do this fairly easily when we are working on a local chain, we can set the block.timestamp ourselves
+        vm.warp(block.timestamp + interval + 1);
+        // we don't have to do vm.roll() but we are just doing an extra block in our test
+        vm.roll(block.number + 1);
+        _;
+    }
+
     function setUp() external {
         DeployRaffle deployRaffle = new DeployRaffle();
         (raffle, helperConfig) = deployRaffle.run();
@@ -104,18 +123,10 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: entranceFee}();
     }
 
-    function testCantEnterWhenRaffleIsCalculating() public {
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-
-        // now we need to kick of a performUpkeep to get the raffle into the calculating state
-        // in order to do this we need our checkUpkeep to return true
-        // first thing we need to do is pass enough time
-        // foundry gives us some cheats to do this fairly easily when we are working on a local chain, we can set the block.timestamp ourselves
-        vm.warp(block.timestamp + interval + 1);
-        // we don't have to do vm.roll() but we are just doing an extra block in our test
-        vm.roll(block.number + 1);
-
+    function testCantEnterWhenRaffleIsCalculating()
+        public
+        raffleEnteredAndTimePassed
+    {
         raffle.performUpkeep("");
 
         // now we shouldn't be able to enter the raffle
@@ -142,12 +153,11 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpkeepReturnsFalseIfRaffleNotOpen() public {
+    function testCheckUpkeepReturnsFalseIfRaffleNotOpen()
+        public
+        raffleEnteredAndTimePassed
+    {
         // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1);
-        vm.roll(block.number + 1);
         raffle.performUpkeep("");
 
         // Act
@@ -181,12 +191,11 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function testCheckUpkeepReturnsTrueIfAllParametersAreGood() public {
+    function testCheckUpkeepReturnsTrueIfAllParametersAreGood()
+        public
+        raffleEnteredAndTimePassed
+    {
         // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1);
-        vm.roll(block.number + 1);
 
         // Act
         (bool upkeepNeeded, ) = raffle.checkUpkeep("");
@@ -200,12 +209,11 @@ contract RaffleTest is Test {
         ########## performUpkeep 🎤 ##########
         ######################################
     */
-    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsTrue() public {
+    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsTrue()
+        public
+        raffleEnteredAndTimePassed
+    {
         // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1);
-        vm.roll(block.number + 1);
 
         // Act / Assert
         // the test shall pass if the performUpkeep function does not revert
@@ -228,5 +236,13 @@ contract RaffleTest is Test {
             )
         );
         raffle.performUpkeep("");
+    }
+
+    // testing output of an event
+    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId()
+        public
+        raffleEnteredAndTimePassed
+    {
+        // Arrange
     }
 }
