@@ -6,6 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {Raffle} from "../../src/Raffle.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 contract RaffleTest is Test {
     Raffle raffle;
@@ -244,5 +245,33 @@ contract RaffleTest is Test {
         raffleEnteredAndTimePassed
     {
         // Arrange
+
+        /*  
+            // Act
+            - We are going to use another cheat code here to test the output of an event
+            - There is a cheatcode in foundry called 'recordLogs', which tells the VM to start recording all the emitted events.
+            - To access them we can use 'getRecordedLogs'
+        */
+        vm.recordLogs();
+        raffle.performUpkeep(""); // this is going to emmit the requestId
+        Vm.Log[] memory logs = vm.getRecordedLogs(); // Vm.Log is an special type provided by foundry and this line will get all the logs which was recently emitted
+        /*  
+            But how do we know which log is the one we are interested in? Maybe the function is emitting multiple logs.
+            - One of the ways is to use the Foundry debugger by using
+                forge test --debug "$FUNCTION_NAME"
+
+                eg. forge test --debug "testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId()"
+            - For now, we are going to cheat a little bit as we know our emitted event will be in the 2nd position, first event would be emitted by requestRandomWords function in the mocks
+        */
+        bytes32 requestId = logs[1].topics[1]; // we are getting the requestId from the logs
+        // even though requestId is the first topic in the event, topics[0] indicates to the whole event rather than the first topic
+        // but the logs[1] refers to the second log emitted by the performUpkeep function
+        // also all the logs are returned as bytes32
+
+        Raffle.RaffleState rState = raffle.getRaffleState();
+
+        assert(uint256(requestId) > 0);
+        assert(rState == Raffle.RaffleState.CALCULATING);
+        assert(uint256(rState) == 1);
     }
 }
