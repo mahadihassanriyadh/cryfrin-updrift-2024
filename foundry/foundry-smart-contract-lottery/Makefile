@@ -48,7 +48,7 @@ deploy-fundMe-sepolia:
 
 coverage-report:; @forge coverage --report debug > test-coverage.txt
 
-push:
+commit:
 	git add -A
 	git commit -s -m "$(m)"
 	git push
