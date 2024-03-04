@@ -58,6 +58,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     */
     event EnteredRaffle(address indexed player);
     event PickedWinner(address indexed winner);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor(
         uint256 _entranceFee,
@@ -150,13 +151,18 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
                 1. Request a random number -> This is a outgoing request transaction to Chainlink VRF
                 2. Get the random number (Callback Request) <- This is a incoming recieving transaction coming from Chainlink VRF
         */
-        i_vrfCoordinator.requestRandomWords(
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash, // gas lane
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
             NUM_OF_WORDS
         );
+
+        // Is this redundant that we are emitting the requestId here?
+        // the answer is yes, because if we go to the VRFCoordinatorV2Mock contract, we will see an event 'RandomWordsRequested' is already emitted in the 'requestRandomWords' function. So wheneve we call the 'requestRandomWords' function, the 'RandomWordsRequested' event will be emitted. Which contains the requestId. So we don't need to emit the requestId here.
+        // however we are doing it here just to perform a test, the reason we're going to do that is because in our test, we're going to asnwer this question, What if I need to test using the output of an event? As we already know events are not accessible from a contract. But in solidity we can test the events
+        emit RequestedRaffleWinner(requestId);
     }
 
     function fulfillRandomWords(
