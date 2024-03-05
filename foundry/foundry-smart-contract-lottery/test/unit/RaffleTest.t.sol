@@ -7,6 +7,7 @@ import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {Raffle} from "../../src/Raffle.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {Vm} from "forge-std/Vm.sol";
+import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
 
 contract RaffleTest is Test {
     Raffle raffle;
@@ -273,5 +274,28 @@ contract RaffleTest is Test {
         assert(uint256(requestId) > 0);
         assert(rState == Raffle.RaffleState.CALCULATING);
         assert(uint256(rState) == 1);
+    }
+
+    /*  
+        ###########################################
+        ########## fulfillRandomWords 🎁 ##########
+        ###########################################
+    */
+    function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
+        uint256 randomRequestId
+    ) public raffleEnteredAndTimePassed {
+        // Arrange
+        vm.expectRevert("nonexistent request");
+
+        // Act
+        // This should fail as we haven't called performUpkeep yet
+        // And are expecting a "nonexistent request" error, because this is defined in the mock, if the requestId is not found, the mock should revert with this error
+        // However, we should test this for different randomRequestIds as well instead of just one or two. For example if we just passed 0 or 1 our test would still go through, but we did not test if the next line will revert if we pass 10 or 55 etc.
+        // That is where the "Fuzz Test" comes in, where we test the same function with different inputs
+        // we can take a parameter call randomRequestId and then we can just pass it to the VRFCoordinatorV2Mock and foundry will randomly select different number and test the function with different inputs
+        VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
+            randomRequestId,
+            address(raffle)
+        );
     }
 }

@@ -151,6 +151,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
                 1. Request a random number -> This is a outgoing request transaction to Chainlink VRF
                 2. Get the random number (Callback Request) <- This is a incoming recieving transaction coming from Chainlink VRF
         */
+        // requestRandomWords() function is used to send the request for random values to Chainlink VRF.
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash, // gas lane
             i_subscriptionId,
@@ -165,6 +166,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         emit RequestedRaffleWinner(requestId);
     }
 
+    // Chainlink VRF fulfills the request and returns the random values to your contract in a callback to the fulfillRandomWords() function.
     function fulfillRandomWords(
         uint256 /* requestId */,
         uint256[] memory randomWords
