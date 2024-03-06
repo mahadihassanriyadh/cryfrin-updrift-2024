@@ -282,7 +282,7 @@ contract RaffleTest is Test {
         ###########################################
     */
     function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
-        uint256 randomRequestId
+        uint256 _randomRequestId
     ) public raffleEnteredAndTimePassed {
         // Arrange
         vm.expectRevert("nonexistent request");
@@ -294,7 +294,7 @@ contract RaffleTest is Test {
         // That is where the "Fuzz Test" comes in, where we test the same function with different inputs
         // we can take a parameter call randomRequestId and then we can just pass it to the VRFCoordinatorV2Mock and foundry will randomly select different number and test the function with different inputs
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
-            randomRequestId,
+            _randomRequestId,
             address(raffle)
         );
     }

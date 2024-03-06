@@ -169,9 +169,9 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     // Chainlink VRF fulfills the request and returns the random values to your contract in a callback to the fulfillRandomWords() function.
     function fulfillRandomWords(
         uint256 /* requestId */,
-        uint256[] memory randomWords
+        uint256[] memory _randomWords
     ) internal override {
-        uint256 indexOfWinner = randomWords[0] % s_players.length;
+        uint256 indexOfWinner = _randomWords[0] % s_players.length;
         address payable winner = s_players[indexOfWinner];
         s_recentWinner = winner;
         s_raffleState = RaffleState.OPEN;
