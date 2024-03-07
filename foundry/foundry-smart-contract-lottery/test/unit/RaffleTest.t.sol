@@ -51,6 +51,22 @@ contract RaffleTest is Test {
         _;
     }
 
+    modifier skipFork() {
+        // 31337 is the chain id for the local Anvil chain
+        // so we want to skip the fork if we are not on the Anvil chain
+        if (block.chainid != 31337) {
+            console.log("Skipping fork");
+            return;
+        }
+        _;
+    }
+
+    /*  
+        ##############################
+        ########## Setup ✨ ##########
+        ##############################
+    */
+
     function setUp() external {
         DeployRaffle deployRaffle = new DeployRaffle();
         (raffle, helperConfig) = deployRaffle.run();
@@ -64,6 +80,7 @@ contract RaffleTest is Test {
             callbackGasLimit,
             link,
             // deployerKey
+
         ) = helperConfig.activeNetworkConfig();
 
         vm.deal(PLAYER, STARTING_USER_BALANCE);
@@ -225,7 +242,7 @@ contract RaffleTest is Test {
         raffle.performUpkeep("");
     }
 
-    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsFalse() public {
+    function testPerformUpkeepRevertsIfCheckUpkeepIsFalse() public {
         // Arrange
         uint256 currentBalance = 0;
         uint256 numOfPlayers = 0;
@@ -246,6 +263,7 @@ contract RaffleTest is Test {
     function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId()
         public
         raffleEnteredAndTimePassed
+        skipFork
     {
         // Arrange
 
@@ -283,6 +301,7 @@ contract RaffleTest is Test {
         ########## fulfillRandomWords 🎁 ##########
         ###########################################
     */
+    // the test `testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep()` will not work for real test chain or real chain overall because the function `fulfillRandomWords` works a little bit differently in the actual VRF Coordinator than our mock
     function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
         uint256 _randomRequestId
     ) public raffleEnteredAndTimePassed {
@@ -306,6 +325,7 @@ contract RaffleTest is Test {
     function testFulFillRandomWordsPicksAWinnerResetAndSendsMoney()
         public
         raffleEnteredAndTimePassed
+        skipFork
     {
         // Arrange
         uint256 additionalEntrance = 5;
