@@ -294,6 +294,7 @@ contract RaffleTest is Test {
         // That is where the "Fuzz Test" comes in, where we test the same function with different inputs
         // we can take a parameter call randomRequestId and then we can just pass it to the VRFCoordinatorV2Mock and foundry will randomly select different number and test the function with different inputs
         // ⭐️ we are the one pretending to be the Chainlink VRF here, the reason is we do not have a read Chainlin VRF in the testing environment, thus we are using the VRFCoordinatorV2Mock to pretend to be the Chainlink VRF
+        // so this test won't work if we work on some real test chain or real chain overall
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
             _randomRequestId,
             address(raffle)
@@ -305,18 +306,57 @@ contract RaffleTest is Test {
         raffleEnteredAndTimePassed
     {
         // Arrange
-        // we are going to use the VRFCoordinatorV2Mock to fulfill the request
+        uint256 additionalEntrance = 7;
+        uint256 startingIdx = 1;
+        for (uint256 i = startingIdx; i <= additionalEntrance; i++) {
+            address player = address(uint160(i));
+            // hoax is another cheatcode by foundry to setup prank user and send ether to the contract
+            // so, prank + deal = hoax
+            hoax(player, STARTING_USER_BALANCE);
+            raffle.enterRaffle{value: entranceFee}();
+        }
+        uint256 previousTimeStamp = raffle.getLastTimeStamp();
+        uint256 prize = address(raffle).balance;
+
+        // Act
+        // pretend to be chainlink VRF to get the random number & pick the winner
+        vm.recordLogs();
+        raffle.performUpkeep(""); // this is going to emmit the requestId
+        Vm.Log[] memory logs = vm.getRecordedLogs(); // Vm.Log is an special type provided by foundry and this line will get all the logs which was recently emitted
+        bytes32 requestId = logs[1].topics[1];
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
-            _randomRequestId,
+            uint256(requestId),
             address(raffle)
         );
 
-        // Act
         // Assert
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
+        assert(raffle.getRecentWinner() != address(0));
         assert(raffle.getPlayers().length == 0);
-        assert(raffle.getRecentWinner() == PLAYER);
-        assert(vm.getBalance(address(raffle)) == 0);
-        assert(vm.getBalance(PLAYER) == STARTING_USER_BALANCE + entranceFee);
+        assert(raffle.getLastTimeStamp() > previousTimeStamp);
+        assert(address(raffle).balance == 0);
+        assert(
+            raffle.getRecentWinner().balance ==
+                STARTING_USER_BALANCE + prize - entranceFee
+        );
+
+        assertEq(
+            logs[1].topics[0],
+            keccak256("RequestedRaffleWinner(uint256)")
+        );
+        // previous vm.getRecordedLogs() consumed all the emitted logs till then, so now we will get newly emitted logs after our last recordLogs() call
+        logs = vm.getRecordedLogs();
+        console.log(
+            "Log Topic Address",
+            address(uint160(uint256(logs[0].topics[1])))
+        );
+        console.log("Recent Winner Address", raffle.getRecentWinner());
+        assertEq(logs[0].topics[0], keccak256("PickedWinner(address)"));
+        assertEq(
+            logs[0].topics[1],
+            bytes32(uint256(uint160(raffle.getRecentWinner())))
+        );
+        // address emittedWinner = address(uint160(uint256(updatedLogs[2].topics[1])));
+        // assert(emittedWinner == raffle.getRecentWinner());
     }
 }
