@@ -12,7 +12,7 @@ import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() public returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
-        (, , address vrfCoordinator, , , , ) = helperConfig
+        (, , address vrfCoordinator, , , , , ) = helperConfig
             .activeNetworkConfig();
         return createSubscription(vrfCoordinator);
     }
@@ -49,7 +49,8 @@ contract FundSubscription is Script {
             ,
             uint64 subscriptionId,
             ,
-            address link
+            address link,
+
         ) = helperConfig.activeNetworkConfig();
 
         fundSubscription(vrfCoordinator, subscriptionId, link);
@@ -94,23 +95,32 @@ contract FundSubscription is Script {
 contract AddConsumer is Script {
     function addConsumerUsingConfig(address _raffle) public {
         HelperConfig helperConfig = new HelperConfig();
-        (, , address vrfCoordinator, , uint64 subscriptionId, , ) = helperConfig
-            .activeNetworkConfig();
+        (
+            ,
+            ,
+            address vrfCoordinator,
+            ,
+            uint64 subscriptionId,
+            ,
+            ,
+            uint256 deployerKey
+        ) = helperConfig.activeNetworkConfig();
 
-        addConsumer(_raffle, vrfCoordinator, subscriptionId);
+        addConsumer(_raffle, vrfCoordinator, subscriptionId, deployerKey);
     }
 
     function addConsumer(
         address _raffle,
         address _vrfCoordinator,
-        uint64 _subscriptionId
+        uint64 _subscriptionId,
+        uint256 _deployerKey
     ) public {
         console.log("Adding consumer to raffle: ", _raffle);
         console.log("Using vrfCoordinator: ", _vrfCoordinator);
         console.log("Using subscriptionId: ", _subscriptionId);
         console.log("Using chain id: ", block.chainid);
 
-        vm.startBroadcast();
+        vm.startBroadcast(_deployerKey);
         VRFCoordinatorV2Mock(_vrfCoordinator).addConsumer(
             _subscriptionId,
             _raffle

@@ -7,6 +7,10 @@ import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoord
 import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 contract HelperConfig is Script {
+    // This is not an address type, this is a hex value of the private key which is of type uint256
+    uint256 public constant DEFAULT_ANVIL_PRIVATE_KEY =
+        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+
     struct NetworkConfig {
         uint256 entranceFee;
         uint256 interval;
@@ -15,6 +19,7 @@ contract HelperConfig is Script {
         uint64 subscriptionId;
         uint32 callbackGasLimit;
         address link;
+        uint256 deployerKey;
     }
 
     NetworkConfig public activeNetworkConfig;
@@ -28,7 +33,7 @@ contract HelperConfig is Script {
         }
     }
 
-    function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
+    function getSepoliaEthConfig() public view returns (NetworkConfig memory) {
         return
             NetworkConfig({
                 entranceFee: 0.1 ether,
@@ -37,7 +42,8 @@ contract HelperConfig is Script {
                 keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
                 subscriptionId: 9866,
                 callbackGasLimit: 500000, // 500k gas
-                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789 // sepolia LINK token address (https://docs.chain.link/resources/link-token-contracts)
+                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789, // sepolia LINK token address (https://docs.chain.link/resources/link-token-contracts)
+                deployerKey: vm.envUint("SEPOLIA_PRIVATE_KEY") // vm.envUint is another foundry cheat to get something from the environment file
             });
     }
 
@@ -64,7 +70,8 @@ contract HelperConfig is Script {
                 keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
                 subscriptionId: 0,
                 callbackGasLimit: 500000, // 500k gas
-                link: address(linkToken) // mock LINK token address for Anvil
+                link: address(linkToken), // mock LINK token address for Anvil
+                deployerKey: DEFAULT_ANVIL_PRIVATE_KEY // vm.envUint is another foundry cheat to get something from the environment file
             });
     }
 }
