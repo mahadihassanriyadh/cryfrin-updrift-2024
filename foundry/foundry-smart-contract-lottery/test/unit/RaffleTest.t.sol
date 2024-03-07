@@ -266,7 +266,7 @@ contract RaffleTest is Test {
         */
         bytes32 requestId = logs[1].topics[1]; // we are getting the requestId from the logs
         // even though requestId is the first topic in the event, topics[0] indicates to the whole event rather than the first topic
-        // but the logs[1] refers to the second log emitted by the performUpkeep function
+        // but the logs[1] refers to the second log emitted by the performUpkeep function. This is the second event becaue the first event was emitted by the requestRandomWords function in the mocks
         // also all the logs are returned as bytes32
 
         Raffle.RaffleState rState = raffle.getRaffleState();
