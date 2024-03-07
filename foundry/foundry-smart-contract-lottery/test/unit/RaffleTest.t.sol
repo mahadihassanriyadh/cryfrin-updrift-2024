@@ -293,9 +293,30 @@ contract RaffleTest is Test {
         // However, we should test this for different randomRequestIds as well instead of just one or two. For example if we just passed 0 or 1 our test would still go through, but we did not test if the next line will revert if we pass 10 or 55 etc.
         // That is where the "Fuzz Test" comes in, where we test the same function with different inputs
         // we can take a parameter call randomRequestId and then we can just pass it to the VRFCoordinatorV2Mock and foundry will randomly select different number and test the function with different inputs
+        // ⭐️ we are the one pretending to be the Chainlink VRF here, the reason is we do not have a read Chainlin VRF in the testing environment, thus we are using the VRFCoordinatorV2Mock to pretend to be the Chainlink VRF
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
             _randomRequestId,
             address(raffle)
         );
+    }
+
+    function testFulFillRandomWordsPicksAWinnerResetAndSendsMoney()
+        public
+        raffleEnteredAndTimePassed
+    {
+        // Arrange
+        // we are going to use the VRFCoordinatorV2Mock to fulfill the request
+        VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
+            _randomRequestId,
+            address(raffle)
+        );
+
+        // Act
+        // Assert
+        assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
+        assert(raffle.getPlayers().length == 0);
+        assert(raffle.getRecentWinner() == PLAYER);
+        assert(vm.getBalance(address(raffle)) == 0);
+        assert(vm.getBalance(PLAYER) == STARTING_USER_BALANCE + entranceFee);
     }
 }
