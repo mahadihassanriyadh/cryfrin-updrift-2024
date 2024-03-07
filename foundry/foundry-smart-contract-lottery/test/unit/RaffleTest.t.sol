@@ -263,7 +263,6 @@ contract RaffleTest is Test {
     function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId()
         public
         raffleEnteredAndTimePassed
-        skipFork
     {
         // Arrange
 
@@ -304,7 +303,7 @@ contract RaffleTest is Test {
     // the test `testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep()` will not work for real test chain or real chain overall because the function `fulfillRandomWords` works a little bit differently in the actual VRF Coordinator than our mock
     function testFulFillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
         uint256 _randomRequestId
-    ) public raffleEnteredAndTimePassed {
+    ) public raffleEnteredAndTimePassed skipFork {
         // Arrange
         vm.expectRevert("nonexistent request");
 
