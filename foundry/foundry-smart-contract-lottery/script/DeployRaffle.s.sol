@@ -13,7 +13,7 @@ contract DeployRaffle is Script {
         (
             uint256 entranceFee,
             uint256 interval,
-            address vrfCoordinator,
+            address vrfCoordinatorV2,
             bytes32 keyHash,
             uint64 subscriptionId,
             uint32 callbackGasLimit,
@@ -24,15 +24,13 @@ contract DeployRaffle is Script {
         if (subscriptionId == 0) {
             // create a subscription
             CreateSubscription createSubscription = new CreateSubscription();
-            subscriptionId = createSubscription.createSubscription(
-                vrfCoordinator,
-                deployerKey
-            );
+            (subscriptionId, vrfCoordinatorV2) = createSubscription
+                .createSubscription(vrfCoordinatorV2, deployerKey);
 
             // fund the subscription
             FundSubscription fundSubscription = new FundSubscription();
             fundSubscription.fundSubscription(
-                vrfCoordinator,
+                vrfCoordinatorV2,
                 subscriptionId,
                 link,
                 deployerKey
@@ -43,7 +41,7 @@ contract DeployRaffle is Script {
         Raffle raffle = new Raffle(
             entranceFee,
             interval,
-            vrfCoordinator,
+            vrfCoordinatorV2,
             keyHash,
             subscriptionId,
             callbackGasLimit
@@ -54,7 +52,7 @@ contract DeployRaffle is Script {
         AddConsumer addConsumer = new AddConsumer();
         addConsumer.addConsumer(
             address(raffle),
-            vrfCoordinator,
+            vrfCoordinatorV2,
             subscriptionId,
             deployerKey
         );

@@ -7,6 +7,8 @@ import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoord
 import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 contract HelperConfig is Script {
+    NetworkConfig public activeNetworkConfig;
+    
     // This is not an address type, this is a hex value of the private key which is of type uint256
     uint256 public constant DEFAULT_ANVIL_PRIVATE_KEY =
         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
@@ -21,8 +23,6 @@ contract HelperConfig is Script {
         address link;
         uint256 deployerKey;
     }
-
-    NetworkConfig public activeNetworkConfig;
 
     constructor() {
         // sepolia chain id: 11155111
