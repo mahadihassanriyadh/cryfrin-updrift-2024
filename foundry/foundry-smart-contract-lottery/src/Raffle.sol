@@ -40,7 +40,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     uint256 private immutable i_entranceFee;
     // minimum time interval between two raffles in seconds
     uint256 private immutable i_interval;
-    bytes32 private immutable i_keyHash; // gas lane
+    bytes32 private immutable i_keyHash; // gas lane, this is proportional to the gas usage. Chainlink VRF has multiple keyHashes, each keyHash has a different gas usage. If we want faster response, we can use a keyHash with higher gas usage.
     uint64 private immutable i_subscriptionId;
     uint32 private immutable i_callbackGasLimit;
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
