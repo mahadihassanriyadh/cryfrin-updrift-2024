@@ -66,9 +66,13 @@ contract MyTokenTest is Test {
         myToken.transferFrom(bob, alice, initialAllowance);
     }
 
-    function testFailTransferMoreThanBalance() public {
+    function testCantSendTokenMoreThanBalance() public {
         vm.prank(bob);
-        // vm.expectRevert();
-        myToken.transfer(alice, 1 ether);
+        myToken.transfer(alice, 5 ether);
+        assertEq(myToken.balanceOf(alice), 5 ether);
+
+        vm.prank(bob);
+        vm.expectRevert();
+        myToken.transfer(alice, 200 ether);
     }
 }
