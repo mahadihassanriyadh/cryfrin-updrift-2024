@@ -40,7 +40,7 @@ else ifeq ($(findstring --network ganache,$(ARGS)),--network ganache)
 endif
 
 deploy:
-	@forge script script/DeployRaffle.s.sol:DeployRaffle $(NETWORK_ARGS)
+	@forge script script/DeployMyToken.s.sol:DeployMyToken $(NETWORK_ARGS)
 
 fund:
 	@forge script script/Interactions.s.sol:FundFundMe $(NETWORK_ARGS)
