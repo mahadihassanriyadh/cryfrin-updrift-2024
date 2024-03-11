@@ -20,7 +20,7 @@ clean:; @forge clean
 
 build:; @forge build
 
-install:; @forge install Cyfrin/foundry-devops@0.1.0 --no-commit && forge install smartcontractkit/chainlink-brownie-contracts@0.8.0 --no-commit && forge install transmissions11/solmate@v6 --no-commit && forge install foundry-rs/forge-std@v1.7.6 --no-commit
+install:; @forge install foundry-rs/forge-std@v1.7.6 --no-commit && forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-commit
 
 test:; @forge test 
 
