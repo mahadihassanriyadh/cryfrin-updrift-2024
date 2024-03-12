@@ -12,6 +12,7 @@ contract BasicNFT is ERC721 {
     */
 
     uint256 private s_tokenCounter;
+    mapping(uint256 => string) private s_tokenIdToTokenURI;
 
     constructor(
         string memory _name,
@@ -47,7 +48,15 @@ contract BasicNFT is ERC721 {
         - And this is what defines what the NFT looks like.
         - So for us to create an NFT, each tokenCounter / each tokenURI is going to have a URI that points to a JSON object that looks like this. Which will define what the NFT looks like.
     */
-    function mintNFT() public {}
+    function mintNFT(string memory _tokenURI) public {
+        s_tokenIdToTokenURI[s_tokenCounter] = _tokenURI;
+        _safeMint(msg.sender, s_tokenCounter);
+        s_tokenCounter++;
+    }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {}
+    function tokenURI(
+        uint256 _tokenId
+    ) public view override returns (string memory) {
+        return s_tokenIdToTokenURI[_tokenId];
+    }
 }
