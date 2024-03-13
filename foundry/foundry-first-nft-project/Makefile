@@ -1,6 +1,5 @@
 -include .env
 
-# .PHONY is a special target in Makefiles, used to declare that the targets are not associated with any files.
 .PHONY: all test clean deploy fund help install snapshot format anvil 
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
@@ -10,23 +9,27 @@ help:
 	@echo "  make deploy [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia\""
 	@echo ""
 	@echo "  make fund [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia\""
-	@echo "\n\nGit Commit & Push:"
-	@echo "  make commit m=\"commit message\""
 
-all: @clean remove install update build
+all: clean remove install update build
 
 # Clean the repo
-clean:; @forge clean
+clean  :; forge clean
 
-build:; @forge build
+# Remove modules
+remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
 install:; @forge install foundry-rs/forge-std@v1.7.6 --no-commit && forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-commit && forge install Cyfrin/foundry-devops@0.1.0 --no-commit
 
-test:; @forge test 
+# Update Dependencies
+update:; forge update
 
-snapshot:; @forge snapshot
+build:; forge build
 
-format:; @forge fmt
+test :; forge test 
+
+snapshot :; forge snapshot
+
+format :; forge fmt
 
 # just running `anvil` will start a local anvil instance as well, but the extra flags are for debugging purposes
 anvil :; @anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
@@ -40,13 +43,19 @@ else ifeq ($(findstring --network ganache,$(ARGS)),--network ganache)
 endif
 
 deploy:
-	@forge script script/DeployRaffle.s.sol:DeployRaffle $(NETWORK_ARGS)
+	@forge script script/DeployBasicNft.s.sol:DeployBasicNft $(NETWORK_ARGS)
 
-fund:
-	@forge script script/Interactions.s.sol:FundFundMe $(NETWORK_ARGS)
+mint:
+	@forge script script/Interactions.s.sol:MintBasicNft ${NETWORK_ARGS}
 
-withdraw:
-	@forge script script/Interactions.s.sol:WithdrawFundMe $(NETWORK_ARGS)
+deployMood:
+	@forge script script/DeployMoodNft.s.sol:DeployMoodNft $(NETWORK_ARGS)
+
+mintMoodNft:
+	@forge script script/Interactions.s.sol:MintMoodNft $(NETWORK_ARGS)
+
+flipMoodNft:
+	@forge script script/Interactions.s.sol:FlipMoodNft $(NETWORK_ARGS)
 
 coverage-report:; @forge coverage --report debug > test-coverage.txt
 
