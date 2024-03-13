@@ -10,7 +10,8 @@ contract BasicNFTTest is Test {
     DeployBasicNFT public deployer;
     BasicNFT public basicNFT;
     address public USER = makeAddr("user");
-    string public constant PUG = "ipfs://bafybeig37ioir76s7mg5oobetncojcm3c3hxasyd4rvid4jqhy4gkaheg4/?filename=0-PUG.json";
+    string public constant NIPPY1 = "ipfs://QmQKfTbGSN1XCYG6djwc4LNq8op5zbVxGzv7Vt8nzU7HGr/2974.json";
+    string public constant NIPPY2 = "ipfs://QmQKfTbGSN1XCYG6djwc4LNq8op5zbVxGzv7Vt8nzU7HGr/1792.json";
 
     function setUp() public {
         deployer = new DeployBasicNFT();
@@ -18,7 +19,7 @@ contract BasicNFTTest is Test {
     }
 
     function testNameIsCorrect() public view {
-        string memory expectedName = "Cowie";
+        string memory expectedName = "Nippy";
         string memory actualName = basicNFT.name();
 
         // as strings are arrays of bytes, we can't compare them directly
@@ -43,9 +44,20 @@ contract BasicNFTTest is Test {
 
     function testCanMintAndHaveBalance() public {
         vm.prank(USER);
-        basicNFT.mintNFT(PUG);
+        // Mint the first NFT and assign it to USER
+        basicNFT.mintNFT(NIPPY1);
 
-        assert(basicNFT.balanceOf(USER) == 1);
-        assert(keccak256(abi.encodePacked(basicNFT.tokenURI(0))) == keccak256(abi.encodePacked(PUG)));
+        vm.prank(USER);
+        // Mint the second NFT and assign it to USER
+        basicNFT.mintNFT(NIPPY2);
+
+        // Check that USER now owns 2 NFTs
+        assert(basicNFT.balanceOf(USER) == 2);
+
+        // Check that the token URI of the first NFT is correct
+        assert(keccak256(abi.encodePacked(basicNFT.tokenURI(0))) == keccak256(abi.encodePacked(NIPPY1)));
+
+        // Check that the token URI of the second NFT is correct
+        assert(keccak256(abi.encodePacked(basicNFT.tokenURI(1))) == keccak256(abi.encodePacked(NIPPY2)));
     }
 }
