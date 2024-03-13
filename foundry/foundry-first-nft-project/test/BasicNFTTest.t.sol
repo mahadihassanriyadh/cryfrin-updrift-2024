@@ -61,3 +61,4 @@ contract BasicNFTTest is Test {
         assert(keccak256(abi.encodePacked(basicNFT.tokenURI(1))) == keccak256(abi.encodePacked(NIPPY2)));
     }
 }
+ 
