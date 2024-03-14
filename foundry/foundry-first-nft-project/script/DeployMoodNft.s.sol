@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
 import {MoodNft} from "../src/MoodNft.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 contract DeployMoodNft is Script {
     MoodNft public moodNft;
@@ -23,5 +24,13 @@ contract DeployMoodNft is Script {
         });
         vm.stopBroadcast();
         return moodNft;
+    }
+
+    function svgToImageURI(
+        string memory _svg
+    ) public pure returns (string memory) {
+        string memory baseURL = "data:image/svg+xml;base64,";
+        string memory svgBase64Encoded = Base64.encode(bytes(_svg));
+        return string(abi.encodePacked(baseURL, svgBase64Encoded));
     }
 }
