@@ -23,8 +23,8 @@ contract MoodNft is ERC721 {
         string memory _happySvgImgUri
     ) ERC721(_name, _symbol) {
         s_tokenCounter = 0;
-        _sadSvgImgUri = _sadSvgImgUri;
-        _happySvgImgUri = _happySvgImgUri;
+        s_sadSvgImgUri = _sadSvgImgUri;
+        s_happySvgImgUri = _happySvgImgUri;
     }
 
     function mintNft() public {
@@ -40,10 +40,9 @@ contract MoodNft is ERC721 {
     function tokenURI(
         uint256 _tokenId
     ) public view override returns (string memory) {
-        string memory imageURI;
-        if (s_tokenIdToMood[_tokenId] == Mood.HAPPY) {
-            imageURI = s_happySvgImgUri;
-        } else {
+        string memory imageURI = s_happySvgImgUri;
+
+        if (s_tokenIdToMood[_tokenId] == Mood.SAD) {
             imageURI = s_sadSvgImgUri;
         }
 
@@ -69,12 +68,14 @@ contract MoodNft is ERC721 {
         */
 
         // we are using abi.encodePacked to concatenate the strings here, because we need the data in bytes. As openzeppelin's Base64.encode() function expects the data to be in bytes to convert it into base64.
-        bytes memory tokenMetaData = abi.encodePacked(
-            '"name": "',
-            name(),
-            '", "description": "An NFT that represents the mood of the owner", "attributes": [{"trait_type": "moodiness", "value": 100}], "image": "',
-            imageURI,
-            '"}'
+        bytes memory tokenMetaData = bytes(
+            abi.encodePacked(
+                '{"name": "',
+                name(),
+                '", "description": "An NFT that represents the mood of the owner", "attributes": [{"trait_type": "moodiness", "value": 100}], "image": "',
+                s_happySvgImgUri,
+                '"}'
+            )
         );
 
         // convert the metadata to base64
@@ -82,5 +83,9 @@ contract MoodNft is ERC721 {
 
         // concatenate the baseURI and the base64TokenMetaData
         return string(abi.encodePacked(_baseURI(), base64TokenMetaData));
+    }
+
+    function getHappySvg() external view returns (string memory) {
+        return s_sadSvgImgUri;
     }
 }
