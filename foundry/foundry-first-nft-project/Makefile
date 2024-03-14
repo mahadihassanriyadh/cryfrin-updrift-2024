@@ -59,7 +59,7 @@ flipMoodNft:
 
 coverage-report:; @forge coverage --report debug > test-coverage.txt
 
-commit:
+add:
 	git add -A
 	git commit -s -m "$(m)"
 	git push
