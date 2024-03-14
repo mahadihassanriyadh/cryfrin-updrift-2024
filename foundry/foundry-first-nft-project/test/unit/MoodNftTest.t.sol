@@ -17,9 +17,35 @@ contract MoodNftTest is Test {
         moodNft = deployer.run();
     }
 
+    function testImageUriSetSuccessfully() public {
+        string memory expectedHappySvgImgUri = deployer.svgToImageURI(
+            vm.readFile("./images/dynamicNft/happy.svg")
+        );
+        string memory expectedSadSvgImgUri = deployer.svgToImageURI(
+            vm.readFile("./images/dynamicNft/sad.svg")
+        );
+
+        string memory happySvgImgUri = moodNft.getHappySvgImgUri();
+        string memory sadSvgImgUri = moodNft.getSadSvgImgUri();
+
+        assertEq(
+            keccak256(bytes(happySvgImgUri)),
+            keccak256(bytes(expectedHappySvgImgUri))
+        );
+        assertEq(
+            keccak256(bytes(sadSvgImgUri)),
+            keccak256(bytes(expectedSadSvgImgUri))
+        );
+    }
+
     function testViewTokenURI() public {
         vm.prank(USER);
         moodNft.mintNft();
+
+        vm.prank(USER);
+        moodNft.flipMood(0);
+
+        vm.prank(USER);
         console.log(moodNft.tokenURI(0));
     }
 }
