@@ -41,3 +41,19 @@ contract MintMoodNft is Script {
         vm.stopBroadcast();
     }
 }
+
+contract FlipMoodNft is Script {
+    function run() external {
+        address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
+            "MoodNft",
+            block.chainid
+        );
+        flipMoodOnContract(mostRecentlyDeployed);
+    }
+
+    function flipMoodOnContract(address _contractAddress) public {
+        vm.startBroadcast();
+        MoodNft(_contractAddress).flipMood(0);
+        vm.stopBroadcast();
+    }
+}
