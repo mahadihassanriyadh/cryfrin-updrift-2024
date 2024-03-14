@@ -84,8 +84,4 @@ contract MoodNft is ERC721 {
         // concatenate the baseURI and the base64TokenMetaData
         return string(abi.encodePacked(_baseURI(), base64TokenMetaData));
     }
-
-    function getHappySvg() external view returns (string memory) {
-        return s_sadSvgImgUri;
-    }
 }
