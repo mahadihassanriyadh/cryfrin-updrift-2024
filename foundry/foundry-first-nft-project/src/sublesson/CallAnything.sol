@@ -10,7 +10,21 @@ contract CallAnythig {
         s_someAddress = _someAddress;
         s_amount = _amount;
     }
+    
+    /* 
+        ###################################################
+        ###### ⭐️ Function Selectors & Signatures ⭐️ ######
+        ###################################################
+        Solidity uses a 4 byte function selector to determine which function to call, this is generated from the function signature
+        1. the first 4 bytes of the keccak256 hash of the function signature is the function selector
+        2. the function signature is the function name and the parameter types
 
+        We can get a function selector as easy as this:
+            - "transfer(address,uint256)" is our function signature
+            - and our resulting function selector of "transfer(address,uint256)" is output from this function
+        
+        NOTE: one thing to note here is that there shouldn't be any spaces in "transfer(address,uint256)" 
+    */
     function getSelectorOne() public pure returns (bytes4 selector) {
         selector = bytes4(keccak256("transfer(address,uint256)"));
     }
