@@ -49,6 +49,8 @@ contract CallAnythig {
     }
 
     // Using encodeWithSignature
+    // If we use encodeWithSignature, we don't need to encode the function selector ourselves, this abi.encodeWithSignature will do it for us
+    // We just need to pass in the function signature and the parameters
     function callTransferFunctionDirectlyTwo(
         address someAddress,
         uint256 amount
