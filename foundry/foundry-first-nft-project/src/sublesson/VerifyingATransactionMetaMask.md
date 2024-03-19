@@ -8,3 +8,15 @@ We can use this data to check if metamask is actually calling the right function
 cast --help
 ```
 
+If we type `cast --calldata-decode` we will see this requires two parameters. `<SIG>` and `<CALLDATA>`
+
+First we can match the signature by getting the function signature and matching it with the HEX manually. To do that we can use the following command:
+```bash
+cast sig "transferFrom(address,address,uint256)"
+```
+
+We will get the following output:
+```
+0x23b872dd
+```
+Which matches the first 4 bytes of the HEX we got from MetaMask.
