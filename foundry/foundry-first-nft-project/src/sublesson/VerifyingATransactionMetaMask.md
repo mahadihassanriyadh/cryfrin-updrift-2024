@@ -38,3 +38,9 @@ We will get the following output:
 100000000 [1e8]
 ```
 Which are indeed the arguments we were trying to pass to the function. This means that MetaMask is indeed calling the right function in the smart contract with the right arguments.
+
+### 📝 Note
+If we wanna be absolutely sure of what our transactions are actually doing, we should follow these steps:
+1. Check the address of the contract (Read the function)
+2. Check the function signature / selector
+3. Decode calldata
