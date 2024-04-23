@@ -33,6 +33,7 @@ pragma solidity ^0.8.24;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title DSCEngine
@@ -61,6 +62,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__AmmountMustBeMoreThanZero();
     error DSCEngine__TokenAndPriceFeedLengthMismatch();
     error DSCEngine__TokenNotAllowed();
+    error DSCEngine__TransferFailed();
 
     /*  
         ####################################
@@ -68,8 +70,16 @@ contract DSCEngine is ReentrancyGuard {
         ####################################
     */
     mapping(address token => address priceFeed) private s_priceFeeds; // Mapping of token address to price feed address
+    mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited; // Mapping of user address to mapping of token address to amount deposited
 
     DecentralizedStableCoin private immutable i_dsc; // The DSC token
+
+    /*  
+        ###################################
+        ############ 🎃 Events ############
+        ###################################
+    */
+    event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
 
     /*  
         ####################################
@@ -95,11 +105,7 @@ contract DSCEngine is ReentrancyGuard {
         ########### 📥 Functions ###########
         ####################################
     */
-    constructor(
-        address[] memory tokenAddresses,
-        address[] memory priceFeedAddresses,
-        address dscAddress
-    ) {
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
         // usd Price Feeds
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert DSCEngine__TokenAndPriceFeedLengthMismatch();
@@ -123,19 +129,30 @@ contract DSCEngine is ReentrancyGuard {
      *
      * @notice This function allows users to deposit collateral into the system in order to mint DSC.
      *
+     * @notice nonReentrant modifier
      * we should always use the nonReentrant modifier to prevent reentrancy attacks, especially when dealing with external calls.
      * we will use nonReentrant modifier from OpenZeppelin's ReentrancyGuard contract.
      * this nonReentrant is a little gas intensive, but we should try to always use it when dealing with external calls just to be safe.
+     * 
+     * @notice following the checks-effects-interactions (CEI) pattern.
+     * The modifiers do the checks
+     * Our effects are updating the state variables and emitting an event
      */
-    function depositCollateral(
-        address _tokenCollateralAddress,
-        uint256 _amountCollateral
-    )
+    function depositCollateral(address _tokenCollateralAddress, uint256 _amountCollateral)
         external
         moreThanZero(_amountCollateral)
         isAllowedToken(_tokenCollateralAddress)
         nonReentrant
-    {}
+    {
+        s_collateralDeposited[msg.sender][_tokenCollateralAddress] += _amountCollateral;
+        emit CollateralDeposited(msg.sender, _tokenCollateralAddress, _amountCollateral);
+
+        // Transfer the collateral from the user to this contract
+        bool success = IERC20(_tokenCollateralAddress).transferFrom(msg.sender, address(this), _amountCollateral);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+    }
 
     function redeemCollateral() external {}
 
