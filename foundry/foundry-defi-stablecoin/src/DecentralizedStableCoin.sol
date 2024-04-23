@@ -52,17 +52,27 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin__AmmountMustBeMoreThanZero();
     error DecentralizedStableCoin__BurnAmmountExceedsBalance();
+    error DecentralizedStableCoin__ZeroAddressCannotBeUsed();
 
     constructor()
         ERC20("Decentralized Stable Coin", "DSC")
         Ownable(msg.sender)
     {}
 
-    /** 
+    /**
      * There are two functions we want our engine to own.
      *      burn()
-     *      mint() 
-    */ 
+     *      mint()
+     * 
+     * burn()
+     * in burn() function we are overriding the burn() function from ERC20Burnable contract.
+     * That's why after our task is done, we call the actual burn() function from ERC20Burnable contract using super.burn(_amount).
+     * 
+     * mint()
+     * for mint() function, there is no mint() function in ERC20Burnable contract.
+     * so we can simply implement our mint() function.
+     * and call the _mint() function from ERC20 contract.
+     */
 
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
@@ -73,5 +83,20 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
             revert DecentralizedStableCoin__BurnAmmountExceedsBalance();
         }
         super.burn(_amount);
+    }
+
+    function mint(
+        address _to,
+        uint256 _amount
+    ) external onlyOwner returns (bool) {
+        if (_to == address(0)) {
+            revert DecentralizedStableCoin__ZeroAddressCannotBeUsed();
+        }
+        if (_amount <= 0) {
+            revert DecentralizedStableCoin__AmmountMustBeMoreThanZero();
+        }
+
+        _mint(_to, _amount);
+        return true;
     }
 }
