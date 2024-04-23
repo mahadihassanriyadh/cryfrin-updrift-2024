@@ -8,6 +8,7 @@
     ⭕️ Contract Layout:
         - Pragma statements (Version)
         - Import statements
+        - errors
         - Interfaces, Libraries, Contracts
         - Type declarations
         - State variables
@@ -24,6 +25,8 @@
         - internal
         - private
         - view & pure functions 
+        - internal & private view & pure functions
+        - external & public view & pure functions
 */
 
 pragma solidity ^0.8.24;
@@ -63,11 +66,11 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
      * There are two functions we want our engine to own.
      *      burn()
      *      mint()
-     * 
+     *
      * burn()
      * in burn() function we are overriding the burn() function from ERC20Burnable contract.
      * That's why after our task is done, we call the actual burn() function from ERC20Burnable contract using super.burn(_amount).
-     * 
+     *
      * mint()
      * for mint() function, there is no mint() function in ERC20Burnable contract.
      * so we can simply implement our mint() function.

@@ -8,6 +8,7 @@
     ⭕️ Contract Layout:
         - Pragma statements (Version)
         - Import statements
+        - errors
         - Interfaces, Libraries, Contracts
         - Type declarations
         - State variables
@@ -24,6 +25,8 @@
         - internal
         - private
         - view & pure functions 
+        - internal & private view & pure functions
+        - external & public view & pure functions
 */
 
 pragma solidity ^0.8.24;
@@ -47,13 +50,36 @@ pragma solidity ^0.8.24;
  * @notice This contract is VERY loosely based on the MakerDAO DSS (DAI) system, but is much simpler and has no governance or fees.
  */
 contract DSCEngine {
+    /*  
+        ####################################
+        ########### 📝 Modifiers ###########
+        ####################################
+    */
+    modifier moreThanZero(uint256 _amount) {
+        if (_amount <= 0) {
+            revert;
+        }
+    }
+
+    /*  
+        ####################################
+        ########### 📥 Functions ###########
+        ####################################
+    */
     // deposit collateral and mint DSC
     function depositCollateralAndMintDSC() external {}
 
     // redeem collateral for DSC
     function redeemCollateralForDSC() external {}
 
-    function depositCollateral() external {}
+    /**
+     * @param tokenCollateralAddress The address of the token to deposit as collateral
+     * @param amountCollateral The amount of collateral to deposit
+     */
+    function depositCollateral(
+        address tokenCollateralAddress,
+        uint256 amountCollateral
+    ) external {}
 
     function redeemCollateral() external {}
 

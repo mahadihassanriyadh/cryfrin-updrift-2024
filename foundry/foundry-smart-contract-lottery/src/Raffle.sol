@@ -1,5 +1,34 @@
 // SPDX-License-Identifier: MIT
 
+/*  
+    ####################################################
+    ####### Code Layout & Order (Style Guide) 🎨 #######
+    ####################################################
+
+    ⭕️ Contract Layout:
+        - Pragma statements (Version)
+        - Import statements
+        - errors
+        - Interfaces, Libraries, Contracts
+        - Type declarations
+        - State variables
+        - Events
+        - Modifiers
+        - Functions
+
+    ⭕️ Layout of Functions:
+        - constructor
+        - receive function (if exists)
+        - fallback function (if exists)
+        - external
+        - public
+        - internal
+        - private
+        - view & pure functions 
+        - internal & private view & pure functions
+        - external & public view & pure functions
+*/
+
 pragma solidity ^0.8.24;
 
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -214,29 +243,3 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return s_lastTimeStamp;
     }
 }
-
-/*  
-    ####################################################
-    ####### Code Layout & Order (Style Guide) 🎨 #######
-    ####################################################
-
-    ⭕️ Contract Layout:
-        - Pragma statements (Version)
-        - Import statements
-        - Interfaces, Libraries, Contracts
-        - Type declarations
-        - State variables
-        - Events
-        - Modifiers
-        - Functions
-
-    ⭕️ Layout of Functions:
-        - constructor
-        - receive function (if exists)
-        - fallback function (if exists)
-        - external
-        - public
-        - internal
-        - private
-        - view & pure functions 
-*/
