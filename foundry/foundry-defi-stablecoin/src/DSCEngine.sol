@@ -31,6 +31,9 @@
 
 pragma solidity ^0.8.24;
 
+import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /**
  * @title DSCEngine
  * @author Md. Mahadi Hassan Riyadh
@@ -49,7 +52,25 @@ pragma solidity ^0.8.24;
  * @notice This contract is the core of the DSC System. It handles all the logic for mining and redeeming DSC, as well as depositing & withdrawing collateral.
  * @notice This contract is VERY loosely based on the MakerDAO DSS (DAI) system, but is much simpler and has no governance or fees.
  */
-contract DSCEngine {
+contract DSCEngine is ReentrancyGuard {
+    /*  
+        ####################################
+        ############# ❌ Erros #############
+        ####################################
+    */
+    error DSCEngine__AmmountMustBeMoreThanZero();
+    error DSCEngine__TokenAndPriceFeedLengthMismatch();
+    error DSCEngine__TokenNotAllowed();
+
+    /*  
+        ####################################
+        ######## 🗂️ State Variables ########
+        ####################################
+    */
+    mapping(address token => address priceFeed) private s_priceFeeds; // Mapping of token address to price feed address
+
+    DecentralizedStableCoin private immutable i_dsc; // The DSC token
+
     /*  
         ####################################
         ########### 📝 Modifiers ###########
@@ -57,8 +78,16 @@ contract DSCEngine {
     */
     modifier moreThanZero(uint256 _amount) {
         if (_amount <= 0) {
-            revert;
+            revert DSCEngine__AmmountMustBeMoreThanZero();
         }
+        _;
+    }
+
+    modifier isAllowedToken(address _token) {
+        if (s_priceFeeds[_token] == address(0)) {
+            revert DSCEngine__TokenNotAllowed();
+        }
+        _;
     }
 
     /*  
@@ -66,20 +95,47 @@ contract DSCEngine {
         ########### 📥 Functions ###########
         ####################################
     */
-    // deposit collateral and mint DSC
+    constructor(
+        address[] memory tokenAddresses,
+        address[] memory priceFeedAddresses,
+        address dscAddress
+    ) {
+        // usd Price Feeds
+        if (tokenAddresses.length != priceFeedAddresses.length) {
+            revert DSCEngine__TokenAndPriceFeedLengthMismatch();
+        }
+
+        // For exaple, ETH/USD, BTC/USD, MKR/USD, etc.
+        for (uint256 i = 0; i < tokenAddresses.length; i++) {
+            s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
+        }
+
+        i_dsc = DecentralizedStableCoin(dscAddress);
+    }
+
     function depositCollateralAndMintDSC() external {}
 
-    // redeem collateral for DSC
     function redeemCollateralForDSC() external {}
 
     /**
-     * @param tokenCollateralAddress The address of the token to deposit as collateral
-     * @param amountCollateral The amount of collateral to deposit
+     * @param _tokenCollateralAddress The address of the token to deposit as collateral
+     * @param _amountCollateral The amount of collateral to deposit
+     *
+     * @notice This function allows users to deposit collateral into the system in order to mint DSC.
+     *
+     * we should always use the nonReentrant modifier to prevent reentrancy attacks, especially when dealing with external calls.
+     * we will use nonReentrant modifier from OpenZeppelin's ReentrancyGuard contract.
+     * this nonReentrant is a little gas intensive, but we should try to always use it when dealing with external calls just to be safe.
      */
     function depositCollateral(
-        address tokenCollateralAddress,
-        uint256 amountCollateral
-    ) external {}
+        address _tokenCollateralAddress,
+        uint256 _amountCollateral
+    )
+        external
+        moreThanZero(_amountCollateral)
+        isAllowedToken(_tokenCollateralAddress)
+        nonReentrant
+    {}
 
     function redeemCollateral() external {}
 
