@@ -65,6 +65,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TokenNotAllowed();
     error DSCEngine__TransferFailed();
     error DSCEngine__HealthFactorTooLow(uint256 healthFactor);
+    error DSCEngine__MintFailed();
 
     /*  
         ####################################
@@ -179,6 +180,13 @@ contract DSCEngine is ReentrancyGuard {
         s_DSCMinted[msg.sender] += _amountDscToMint;
 
         // we should check if they have minted too much ($150 DSC, $100 ETH)
+        _revertIfHealthFactorIsBroken(msg.sender);
+
+        bool minted = i_dsc.mint(msg.sender, _amountDscToMint);
+
+        if (!minted) {
+            revert DSCEngine__MintFailed();
+        }
     }
 
     function redeemCollateral() external {}
