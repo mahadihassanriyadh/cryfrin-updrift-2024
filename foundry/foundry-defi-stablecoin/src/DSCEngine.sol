@@ -34,6 +34,7 @@ pragma solidity ^0.8.24;
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
  * @title DSCEngine
@@ -69,6 +70,9 @@ contract DSCEngine is ReentrancyGuard {
         ######## 🗂️ State Variables ########
         ####################################
     */
+    uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
+    uint256 private constant PRECISION = 1e18;
+
     mapping(address token => address priceFeed) private s_priceFeeds; // Mapping of token address to price feed address
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited; // Mapping of user address to mapping of token address to amount deposited
     mapping(address user => uint256 amountDSCMinted) private s_DSCMinted;
@@ -259,26 +263,40 @@ contract DSCEngine is ReentrancyGuard {
     /**
      *
      * @param _user The address of the user to get the collateral value of
-     * @return collateralValueInUsd The value of all collateral in USD
-     * 
+     * @return totalCollateralValueInUsd The value of all collateral in USD
+     *
      * To calculate the value of all collateral in USD, we need to:
      * - Loop through all collateral tokens
      * - Get the amount of each token deposited by the user
      * - And map that to the price feed to get the USD value
      */
-    function getAccountCollateralValueInUsd(address _user) public view returns (uint256 collateralValueInUsd) {
+    function getAccountCollateralValueInUsd(address _user) public view returns (uint256 totalCollateralValueInUsd) {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[_user][token];
-            address priceFeed = s_priceFeeds[token];
-            // uint256 price = IPriceFeed(priceFeed).getPrice();
-            // collateralValueInUsd += amount * price;
+            totalCollateralValueInUsd += getUsdValue(token, amount);
         }
+
+        // we do not need to return here as we have explicitly named the returned variable while declaring the function, inside returns (uint256 totalCollateralValueInUsd)
+        // return totalCollateralValueInUsd;
     }
 
     function getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
-        address priceFeed = s_priceFeeds[_token];
-        // uint256 price = IPriceFeed(priceFeed).getPrice();
-        // return _amount * price;
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // price is in 8 decimal places
+        // so if 1 ETH = $1000, we would get 1000 * 10e8 here
+        // now if we wanted to calculate the value, we couldn't simply do:
+        //    price * amount (considering amount = 1 ETH = 1 * 1e18 wei)
+        //    because that would mean (1000 * 1e8) * (1 * 1e18)
+        // Which would return a massive number, and we can also see the units don't match up
+        // price is in 8 decimals, whereas amount (eth) is in 18 decimals
+        // so we need to match those as well
+        // so let's first multiply price by 1e10
+        //    (1000 * 1e8 * (1e10)) * (1 * 1e18)
+        // And finally divide the whole thing by 1e18 as we were multiply 1e18 two times, one from price, one from amount
+        // Diving with 1e18 would nullify the effect of one of the multiplication
+        // So our returned value would be in 18 decimal points instead of 36
+        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
     }
 }
