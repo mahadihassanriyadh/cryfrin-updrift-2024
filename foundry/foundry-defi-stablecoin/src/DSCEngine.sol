@@ -71,6 +71,8 @@ contract DSCEngine is ReentrancyGuard {
     */
     mapping(address token => address priceFeed) private s_priceFeeds; // Mapping of token address to price feed address
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited; // Mapping of user address to mapping of token address to amount deposited
+    mapping(address user => uint256 amountDSCMinted) private s_DSCMinted;
+    address[] private s_collateralTokens; // Array of all collateral tokens
 
     DecentralizedStableCoin private immutable i_dsc; // The DSC token
 
@@ -114,11 +116,17 @@ contract DSCEngine is ReentrancyGuard {
         // For exaple, ETH/USD, BTC/USD, MKR/USD, etc.
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
+            s_collateralTokens.push(tokenAddresses[i]);
         }
 
         i_dsc = DecentralizedStableCoin(dscAddress);
     }
 
+    /*  
+        #############################################
+        ########### 📥 External Functions ###########
+        #############################################
+    */
     function depositCollateralAndMintDSC() external {}
 
     function redeemCollateralForDSC() external {}
@@ -133,7 +141,7 @@ contract DSCEngine is ReentrancyGuard {
      * we should always use the nonReentrant modifier to prevent reentrancy attacks, especially when dealing with external calls.
      * we will use nonReentrant modifier from OpenZeppelin's ReentrancyGuard contract.
      * this nonReentrant is a little gas intensive, but we should try to always use it when dealing with external calls just to be safe.
-     * 
+     *
      * @notice following the checks-effects-interactions (CEI) pattern.
      * The modifiers do the checks
      * Our effects are updating the state variables and emitting an event
@@ -154,9 +162,18 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function redeemCollateral() external {}
+    /**
+     * @notice Follows CEI
+     * @param _amountDscToMint The amount of DSC to mint
+     * @notice To mint DSC, we need to check if the collateral value > minimum threshold value of DSC
+     */
+    function mintDSC(uint256 _amountDscToMint) external moreThanZero(_amountDscToMint) nonReentrant {
+        s_DSCMinted[msg.sender] += _amountDscToMint;
 
-    function mintDSC() external {}
+        // we should check if they have minted too much ($150 DSC, $100 ETH)
+    }
+
+    function redeemCollateral() external {}
 
     function burnDSC() external {}
 
@@ -201,4 +218,67 @@ contract DSCEngine is ReentrancyGuard {
         - This is my punishment for being undercollateralized. 
     */
     function getHealthFacoctor() external view {}
+
+    /*  
+        ############################################################
+        ########### 📥 Private & Internal View Functions ###########
+        ############################################################
+    */
+    function _getAccountInfo(address _user)
+        internal
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        totalDscMinted = s_DSCMinted[_user];
+        collateralValueInUsd = getAccountCollateralValueInUsd(_user);
+    }
+
+    /**
+     * @param _user The address of the user to check the health factor of
+     * This function returns how close to liquidation a user is.
+     * If the health factor is below 1, the user is undercollateralized and should be liquidated.
+     *
+     * To perfom this calculation, we need:
+     * - The value of all collateral
+     * - The value of all DSC
+     */
+    function _healthFactor(address _user) internal view returns (uint256) {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInfo(_user);
+    }
+
+    function _revertIfHealthFactorIsBroken(address _user) internal view {
+        // 1. Check health factor (do they have enough collateral to back their DSC?)
+        // 2. revert if they don't
+    }
+
+    /*  
+        ###########################################################
+        ########### 📥 Public & External View Functions ###########
+        ###########################################################
+    */
+    /**
+     *
+     * @param _user The address of the user to get the collateral value of
+     * @return collateralValueInUsd The value of all collateral in USD
+     * 
+     * To calculate the value of all collateral in USD, we need to:
+     * - Loop through all collateral tokens
+     * - Get the amount of each token deposited by the user
+     * - And map that to the price feed to get the USD value
+     */
+    function getAccountCollateralValueInUsd(address _user) public view returns (uint256 collateralValueInUsd) {
+        for (uint256 i = 0; i < s_collateralTokens.length; i++) {
+            address token = s_collateralTokens[i];
+            uint256 amount = s_collateralDeposited[_user][token];
+            address priceFeed = s_priceFeeds[token];
+            // uint256 price = IPriceFeed(priceFeed).getPrice();
+            // collateralValueInUsd += amount * price;
+        }
+    }
+
+    function getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
+        address priceFeed = s_priceFeeds[_token];
+        // uint256 price = IPriceFeed(priceFeed).getPrice();
+        // return _amount * price;
+    }
 }
