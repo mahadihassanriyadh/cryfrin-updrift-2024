@@ -56,10 +56,10 @@ contract HelperConfig is Script {
         vm.stopBroadcast();
 
         return NetworkConfig({
-            wethUsdPriceFeed: ethUsdPriceFeed,
-            wbtcUsdPriceFeed: btcUsdPriceFeed,
-            weth: wethMock,
-            wbtc: wbtcMock,
+            wethUsdPriceFeed: address(ethUsdPriceFeed),
+            wbtcUsdPriceFeed: address(btcUsdPriceFeed),
+            weth: address(wethMock),
+            wbtc: address(wbtcMock),
             deployerKey: DEFAUT_ANVIL_KEY
         });
     }

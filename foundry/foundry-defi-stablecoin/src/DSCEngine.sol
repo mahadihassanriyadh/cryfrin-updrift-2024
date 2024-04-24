@@ -32,7 +32,7 @@
 pragma solidity ^0.8.24;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -319,7 +319,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 answer,,,) = priceFeed.latestRoundData();
         // price is in 8 decimal places
         // so if 1 ETH = $1000, we would get 1000 * 10e8 here
         // now if we wanted to calculate the value, we couldn't simply do:
@@ -333,6 +333,6 @@ contract DSCEngine is ReentrancyGuard {
         // And finally divide the whole thing by 1e18 as we were multiply 1e18 two times, one from price, one from amount
         // Diving with 1e18 would nullify the effect of one of the multiplication
         // So our returned value would be in 18 decimal points instead of 36
-        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
+        return ((uint256(answer) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
     }
 }

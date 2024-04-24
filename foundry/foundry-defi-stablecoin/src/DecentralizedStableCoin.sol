@@ -57,10 +57,7 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin__BurnAmmountExceedsBalance();
     error DecentralizedStableCoin__ZeroAddressCannotBeUsed();
 
-    constructor()
-        ERC20("Decentralized Stable Coin", "DSC")
-        Ownable(msg.sender)
-    {}
+    constructor() ERC20("Decentralized Stable Coin", "DSC") Ownable() {}
 
     /**
      * There are two functions we want our engine to own.
@@ -76,7 +73,6 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
      * so we can simply implement our mint() function.
      * and call the _mint() function from ERC20 contract.
      */
-
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
         if (_amount <= 0) {
@@ -88,10 +84,7 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
         super.burn(_amount);
     }
 
-    function mint(
-        address _to,
-        uint256 _amount
-    ) external onlyOwner returns (bool) {
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
         if (_to == address(0)) {
             revert DecentralizedStableCoin__ZeroAddressCannotBeUsed();
         }
