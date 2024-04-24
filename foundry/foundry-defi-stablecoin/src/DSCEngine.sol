@@ -64,6 +64,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TokenAndPriceFeedLengthMismatch();
     error DSCEngine__TokenNotAllowed();
     error DSCEngine__TransferFailed();
+    error DSCEngine__HealthFactorTooLow(uint256 healthFactor);
 
     /*  
         ####################################
@@ -72,6 +73,7 @@ contract DSCEngine is ReentrancyGuard {
     */
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
+    uint256 private constant MIN_HEALTH_FACTOR = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
     uint256 private constant LIQUIDATION_PRECISION = 100;
 
@@ -255,17 +257,30 @@ contract DSCEngine is ReentrancyGuard {
         // let, totalDscMinted = $100, collateralValueInUsd = $150
         // collateralAdjustedForThreshold = 150 * (50 / 100) = 75
         // return collateralValueInUsd / totalDscMinted = 75 / 100 = 0.75
-        // So, the health factor is 0.75, User is UNDERCOLLATERALIZED!!!!!!!!!
+        // So, the health factor is 0.75, User is UNDERCOLLATERALIZED!!!!!!!!! ❌
         // here collateralAdjustedForThreshold is in 18 decimal points, totalDscMinted is in 18 decimal points as well
         // So, if we didn't multiphy collateralAdjustedForThreshold by PRECISION (1e18), we would get a floating point number
         // And we can't have floating point numbers in solidity
 
+        // let's consider another example
+        // totalDscMinted = $100, collateralValueInUsd = $1000
+        // collateralAdjustedForThreshold = 1000 * (50 / 100) = 500
+        // return collateralValueInUsd / totalDscMinted = 500 / 100 = 5
+        // So, the health factor is 5, User is OVERCOLLATERALIZED!!!!!!!!! ✅
+
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
 
+    /**
+     * @notice need to do two things here:
+     * 1. Check health factor (do they have enough collateral to back their DSC?)
+     * 2. revert if they don't
+     */
     function _revertIfHealthFactorIsBroken(address _user) internal view {
-        // 1. Check health factor (do they have enough collateral to back their DSC?)
-        // 2. revert if they don't
+        uint256 userHealthFactor = _healthFactor(_user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert DSCEngine__HealthFactorTooLow(userHealthFactor);
+        }
     }
 
     /*  
