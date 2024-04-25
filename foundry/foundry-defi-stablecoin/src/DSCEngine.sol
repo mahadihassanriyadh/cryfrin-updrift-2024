@@ -154,7 +154,22 @@ contract DSCEngine is ReentrancyGuard {
         mintDSC(_amountDscToMint);
     }
 
-    function redeemCollateralForDSC() external {}
+    /** 
+     * @param _tokenCollateralAddress contract address of the token to redeem as collateral
+     * @param _amountCollateral amount of collateral to redeem
+     * @param _amountDscToBurn amount of DSC to burn
+     * 
+     * @notice This function burns DSC and redeems underlying collateral in one transaction
+    */
+    function redeemCollateralForDSC(
+        address _tokenCollateralAddress,
+        uint256 _amountCollateral,
+        uint256 _amountDscToBurn
+    ) external {
+        burnDSC(_amountDscToBurn);
+        redeemCollateral(_tokenCollateralAddress, _amountCollateral);
+        // redeemCollateral already checks the health factor, so we don't need to do it here
+    }
 
     /**
      *
@@ -162,7 +177,7 @@ contract DSCEngine is ReentrancyGuard {
      * health factor must be over 1 AFTER redeeming the collateral
      */
     function redeemCollateral(address _tokenCollateralAddress, uint256 _amountCollateral)
-        external
+        public
         moreThanZero(_amountCollateral)
         nonReentrant
     {
@@ -235,7 +250,30 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function burnDSC() external {}
+    /**
+     *
+     * @param _amount The amount of DSC to burn
+     *
+     * @notice To burn DSC, we need to:
+     * 1. Take the DSC from the user and bring it to this contract
+     * 2. Burn the DSC from this contract
+     */
+    function burnDSC(uint256 _amount) public moreThanZero(_amount) {
+        s_DSCMinted[msg.sender] -= _amount;
+        bool success = i_dsc.transferFrom(msg.sender, address(this), _amount);
+
+        // this conditional is hypothetically unreachable, because if the transfer fails, the transferFrom function will revert
+        // we are keeping it here just to be safe, in case the i_dsc contract has been implemented incorrectly
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+
+        i_dsc.burn(_amount);
+
+        // i don't think we need to check health factor here, because we are burning DSC, not minting
+        // again just to be safe, we will keep it here for now
+        _revertIfHealthFactorIsBroken(msg.sender);
+    }
 
     /*  
         For exaple, I have:
