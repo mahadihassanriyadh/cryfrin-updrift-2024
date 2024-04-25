@@ -136,7 +136,22 @@ contract DSCEngine is ReentrancyGuard {
         ########### 📥 External Functions ###########
         #############################################
     */
-    function depositCollateralAndMintDSC() external {}
+   /**
+    * 
+    * @param _tokenCollateralAddress contract address of the token to deposit as collateral
+    * @param _amountCollateral amount of collateral to deposit
+    * @param _amountDscToMint amount of DSC to mint
+    * 
+    * @notice this function will deposit your collateral and mint DSC in one transaction
+    */
+    function depositCollateralAndMintDSC(
+        address _tokenCollateralAddress,
+        uint256 _amountCollateral,
+        uint256 _amountDscToMint
+    ) external {
+        depositCollateral(_tokenCollateralAddress, _amountCollateral);
+        mintDSC(_amountDscToMint);
+    }
 
     function redeemCollateralForDSC() external {}
 
@@ -156,7 +171,7 @@ contract DSCEngine is ReentrancyGuard {
      * Our effects are updating the state variables and emitting an event
      */
     function depositCollateral(address _tokenCollateralAddress, uint256 _amountCollateral)
-        external
+        public
         moreThanZero(_amountCollateral)
         isAllowedToken(_tokenCollateralAddress)
         nonReentrant
@@ -176,7 +191,7 @@ contract DSCEngine is ReentrancyGuard {
      * @param _amountDscToMint The amount of DSC to mint
      * @notice To mint DSC, we need to check if the collateral value > minimum threshold value of DSC
      */
-    function mintDSC(uint256 _amountDscToMint) external moreThanZero(_amountDscToMint) nonReentrant {
+    function mintDSC(uint256 _amountDscToMint) public moreThanZero(_amountDscToMint) nonReentrant {
         s_DSCMinted[msg.sender] += _amountDscToMint;
 
         // we should check if they have minted too much ($150 DSC, $100 ETH)
