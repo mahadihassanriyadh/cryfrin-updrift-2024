@@ -67,6 +67,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__HealthFactorTooLow(uint256 healthFactor);
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk(uint256 healthFactor);
+    error DSCEngine__HealthFactorNotImproved(uint256 healthFactor);
 
     /*  
         ####################################
@@ -247,17 +248,7 @@ contract DSCEngine is ReentrancyGuard {
      * 2. Burn the DSC from this contract
      */
     function burnDSC(uint256 _amount) public moreThanZero(_amount) {
-        s_DSCMinted[msg.sender] -= _amount;
-        bool success = i_dsc.transferFrom(msg.sender, address(this), _amount);
-
-        // this conditional is hypothetically unreachable, because if the transfer fails, the transferFrom function will revert
-        // we are keeping it here just to be safe, in case the i_dsc contract has been implemented incorrectly
-        if (!success) {
-            revert DSCEngine__TransferFailed();
-        }
-
-        i_dsc.burn(_amount);
-
+        _burnDSC(_amount, msg.sender, msg.sender);
         // i don't think we need to check health factor here, because we are burning DSC, not minting
         // again just to be safe, we will keep it here for now
         _revertIfHealthFactorIsBroken(msg.sender);
@@ -304,9 +295,9 @@ contract DSCEngine is ReentrancyGuard {
     {
         // We always try to follow the checks-effects-interactions (CEI) pattern
         // 1. First check the health factor of the user, if the user is liquidatable
-        uint256 userHealthFactor = _healthFactor(_user);
-        if (userHealthFactor >= MIN_HEALTH_FACTOR) {
-            revert DSCEngine__HealthFactorOk(userHealthFactor);
+        uint256 startingUserHealthFactor = _healthFactor(_user);
+        if (startingUserHealthFactor >= MIN_HEALTH_FACTOR) {
+            revert DSCEngine__HealthFactorOk(startingUserHealthFactor);
         }
 
         // 2. We want to burn their DSC to cover some of their debt
@@ -333,6 +324,18 @@ contract DSCEngine is ReentrancyGuard {
 
         // 5. We redeem the collateral from the user
         _redeemCollateral(_collateral, totalCollateralToRedeem, _user, msg.sender);
+
+        // 6. We burn the DSC from the user
+        _burnDSC(_debtToCover, _user, msg.sender);
+
+        // 7. We check the health factor of the user again
+        uint256 endingUserHealthFactor = _healthFactor(_user);
+        if(endingUserHealthFactor <= startingUserHealthFactor) {
+            revert DSCEngine__HealthFactorNotImproved(endingUserHealthFactor);
+        }
+
+        // 8. We should also check, if it somehow broke the liquidator's health factor
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     /*  
@@ -365,11 +368,32 @@ contract DSCEngine is ReentrancyGuard {
     */
     /**
      *
+     * @param _amountDscToBurn The amount of DSC to burn
+     * @param onBehalfOf The address of the user whose DSC is being burned
+     * @param dscFrom The liquidator's address, who is paying the debt
+     *
+     * @dev low-level internal function, do not call unless the function calling it is checking the health factor
+     */
+    function _burnDSC(uint256 _amountDscToBurn, address onBehalfOf, address dscFrom) private {
+        s_DSCMinted[onBehalfOf] -= _amountDscToBurn;
+        bool success = i_dsc.transferFrom(dscFrom, address(this), _amountDscToBurn);
+
+        // this conditional is hypothetically unreachable, because if the transfer fails, the transferFrom function will revert
+        // we are keeping it here just to be safe, in case the i_dsc contract has been implemented incorrectly
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+
+        i_dsc.burn(_amountDscToBurn);
+    }
+
+    /**
+     *
      * @param _tokenCollateralAddress The address of the token to redeem as collateral
      * @param _amountCollateral The amount of collateral to redeem
      * @param _from The address to redeem the collateral from
      * @param _to The address to send the collateral to
-     * 
+     *
      * @notice this is an internal function, which we can use to redeem collateral from anybody
      */
     function _redeemCollateral(address _tokenCollateralAddress, uint256 _amountCollateral, address _from, address _to)
