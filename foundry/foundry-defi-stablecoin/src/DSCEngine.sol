@@ -154,13 +154,13 @@ contract DSCEngine is ReentrancyGuard {
         mintDSC(_amountDscToMint);
     }
 
-    /** 
+    /**
      * @param _tokenCollateralAddress contract address of the token to redeem as collateral
      * @param _amountCollateral amount of collateral to redeem
      * @param _amountDscToBurn amount of DSC to burn
-     * 
+     *
      * @notice This function burns DSC and redeems underlying collateral in one transaction
-    */
+     */
     function redeemCollateralForDSC(
         address _tokenCollateralAddress,
         uint256 _amountCollateral,
@@ -275,24 +275,45 @@ contract DSCEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
-    /*  
-        For exaple, I have:
-        - $100 worth of ETH collateral
-        - $50 worth of DSC
-
-        But suddenly, the price of ETH drops by 60%.
-        Now, I have:
-        - $40 worth of ETH collateral
-        - $50 worth of DSC
-
-        I am undercollateralized by $10.
-        I need to liquidate some DSC to get back to a safe position.
-        Or the system should have a checking mechanism to liquidate my DSC, if I am undercollateralized, to save the system.
-        Even in some scenarios, I can get kicked out of the system.
-
-        This liquidate() function is a function which other users can call to remove people from the system who are undercollateralized to save the protocol.
-    */
-    function liquidate() external {}
+    /**
+     *
+     * @param _collateral The address of the collateral token to liquidate
+     * @param _user The address of the user to liquidate who has broken the health factor. Their health factor should be below MIN_HEALTH_FACTOR
+     * @param _debtToCover The amount of DSC you want to burn to improve the user's health factor
+     *
+     * @notice This function allows anyone to liquidate a user who is undercollateralized
+     * @notice This liquidate() function is a function which other users can call to remove people from the system who are undercollateralized to save the protocol.
+     * @notice The function is saying: If someone is undercollateralized, we will pay you to liquidate them.
+     * @notice you can partially liquidate a user
+     * @notice you will get a liquidation bonus for taking the user's funds
+     * @notice this function working assumes the protocol will be roughly 200% overcollateralized in order for this to work
+     *
+     * @notice A known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentivize liquidators
+     * Because for example:
+     * - I have $200 worth of ETH collateral
+     * - I have $50 worth of DSC
+     *
+     * And we try to maintain 200% collateralization ratio
+     *
+     * Now suddenly, the price of ETH drops by 60%
+     * - I have $80 worth of ETH collateral
+     * - I have $50 worth of DSC
+     *
+     * As the collateralization ratio is 200%, my health factor is broken
+     * A liquidator can come in and liquidate me and take my $80 worth of ETH by paying $50 worth of DSC
+     * So the liquidator is getting $30 profit
+     *
+     * However if we were to maintain 100% collateralization ratio,
+     * I wouldn't be undercollateralized, and the liquidator wouldn't liquidate me
+     * But when I get undercollateralized, for exaple, I have $40 worth of ETH and $50 worth of DSC
+     * The liquidator can liquidate me but he/she won't as he/she would be at a loss
+     *
+     */
+    function liquidate(address _collateral, address _user, uint256 _debtToCover)
+        external
+        moreThanZero(_debtToCover)
+        nonReentrant
+    {}
 
     /*  
         There should be a health factor to know the health of the system or protocol.
