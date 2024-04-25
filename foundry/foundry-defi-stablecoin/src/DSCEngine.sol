@@ -66,6 +66,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
     error DSCEngine__HealthFactorTooLow(uint256 healthFactor);
     error DSCEngine__MintFailed();
+    error DSCEngine__HealthFactorOk(uint256 healthFactor);
 
     /*  
         ####################################
@@ -77,6 +78,7 @@ contract DSCEngine is ReentrancyGuard {
     uint256 private constant MIN_HEALTH_FACTOR = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
     uint256 private constant LIQUIDATION_PRECISION = 100;
+    uint256 private constant LIQUIDATION_BONUS = 10; // 10% bonus for liquidators
 
     mapping(address token => address priceFeed) private s_priceFeeds; // Mapping of token address to price feed address
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited; // Mapping of user address to mapping of token address to amount deposited
@@ -313,7 +315,36 @@ contract DSCEngine is ReentrancyGuard {
         external
         moreThanZero(_debtToCover)
         nonReentrant
-    {}
+    {
+        // We always try to follow the checks-effects-interactions (CEI) pattern
+        // 1. First check the health factor of the user, if the user is liquidatable
+        uint256 userHealthFactor = _healthFactor(_user);
+        if (userHealthFactor >= MIN_HEALTH_FACTOR) {
+            revert DSCEngine__HealthFactorOk(userHealthFactor);
+        }
+
+        // 2. We want to burn their DSC to cover some of their debt
+        // 3. We also want to take their collateral (basicually removing them from the system)
+
+        // let's say, they have:
+        // BAD USER: $140 ETH, $100 DSC
+        // So their health factor should be broken as they are not maintaining 200% collateralization ratio
+        // Now we can say, we wanna cover their debt of $100 DSC
+        // debtToCover = $100
+        // To do that we need to know how much that debt is worth in ETH,
+        // $100 of DSC == ??? ETH?
+        // so we need to figure out how much of the ETH or whatever collateral token are we getting for $100 of DSC debt
+        // if the price of ETH is $2000, then we would get $100 / $2000 = 0.05 ETH
+        uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(_collateral, _debtToCover);
+
+        // 4. We also give 10% bonus to the liquidator
+        // so we are giving the liquidator $110 worth of ETH for $100 worth of DSC
+        // ⭐️ we should also implement a feature to liquidate in the event the protocol is insolvent
+        // ⭐️ And sweep extra amounts into a treasury 
+        uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
+
+        uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+    }
 
     /*  
         There should be a health factor to know the health of the system or protocol.
@@ -400,6 +431,26 @@ contract DSCEngine is ReentrancyGuard {
         ###########################################################
     */
     /**
+     * @param _collateralToken The address of the collateral token (WETH, WBTC, etc.)
+     * @param _usdAmmountInWei The amount in USD to convert to the token amount
+     *
+     * @return The amount of tokens needed to represent the USD amount
+     *
+     * To calculate the amount of tokens needed to represent the USD amount, we need to:
+     * - Get the price feed of the token
+     * - Calculate the amount of tokens needed to represent the USD amount
+     *   For example:
+     *   - 1 ETH = $2000, and we have $500 (_usdAmmountInWei)
+     *   - So we would need 500 / 2000 = 0.25 ETH
+     */
+    function getTokenAmountFromUsd(address _collateralToken, uint256 _usdAmmountInWei) public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_collateralToken]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+
+        // ($500e18 * 1e18) / (($2000e8 * 1e10)
+        return (_usdAmmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
+    }
+    /**
      *
      * @param _user The address of the user to get the collateral value of
      * @return totalCollateralValueInUsd The value of all collateral in USD
@@ -409,6 +460,7 @@ contract DSCEngine is ReentrancyGuard {
      * - Get the amount of each token deposited by the user
      * - And map that to the price feed to get the USD value
      */
+
     function getAccountCollateralValueInUsd(address _user) public view returns (uint256 totalCollateralValueInUsd) {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
@@ -422,7 +474,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
-        (, int256 answer,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.latestRoundData();
         // price is in 8 decimal places
         // so if 1 ETH = $1000, we would get 1000 * 10e8 here
         // now if we wanted to calculate the value, we couldn't simply do:
@@ -436,6 +488,6 @@ contract DSCEngine is ReentrancyGuard {
         // And finally divide the whole thing by 1e18 as we were multiply 1e18 two times, one from price, one from amount
         // Diving with 1e18 would nullify the effect of one of the multiplication
         // So our returned value would be in 18 decimal points instead of 36
-        return ((uint256(answer) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
+        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
     }
 }
