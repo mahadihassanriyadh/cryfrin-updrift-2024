@@ -91,6 +91,7 @@ contract DSCEngine is ReentrancyGuard {
         ###################################
     */
     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
+    event CollateralRedeemed(address indexed user, address indexed token, uint256 indexed amount);
 
     /*  
         ####################################
@@ -136,14 +137,14 @@ contract DSCEngine is ReentrancyGuard {
         ########### 📥 External Functions ###########
         #############################################
     */
-   /**
-    * 
-    * @param _tokenCollateralAddress contract address of the token to deposit as collateral
-    * @param _amountCollateral amount of collateral to deposit
-    * @param _amountDscToMint amount of DSC to mint
-    * 
-    * @notice this function will deposit your collateral and mint DSC in one transaction
-    */
+    /**
+     *
+     * @param _tokenCollateralAddress contract address of the token to deposit as collateral
+     * @param _amountCollateral amount of collateral to deposit
+     * @param _amountDscToMint amount of DSC to mint
+     *
+     * @notice this function will deposit your collateral and mint DSC in one transaction
+     */
     function depositCollateralAndMintDSC(
         address _tokenCollateralAddress,
         uint256 _amountCollateral,
@@ -154,6 +155,36 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function redeemCollateralForDSC() external {}
+
+    /**
+     *
+     * In order to redeem collateral:
+     * health factor must be over 1 AFTER redeeming the collateral
+     */
+    function redeemCollateral(address _tokenCollateralAddress, uint256 _amountCollateral)
+        external
+        moreThanZero(_amountCollateral)
+        nonReentrant
+    {
+        // here we are relying on the solidity compiler a little bit as well
+        // if someone tries to pull out more collateral than they have, then the transfer should fail or revert
+        // For example I want to pull out $1000 however I only have $500 in the system
+        // 500 - 1000 = -500, will REVERT ❌
+        // This is only possible with newer versions of solidity with safemath built in
+        s_collateralDeposited[msg.sender][_tokenCollateralAddress] -= _amountCollateral;
+        emit CollateralRedeemed(msg.sender, _tokenCollateralAddress, _amountCollateral);
+
+        // we could calculate the health factor here, but which is gas inefficient
+        // so we will do the transfer first, and then check the health factor
+        // all will be revert anyway if the health factor is broken
+
+        bool success = IERC20(_tokenCollateralAddress).transfer(msg.sender, _amountCollateral);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+
+        _revertIfHealthFactorIsBroken(msg.sender);
+    }
 
     /**
      * @param _tokenCollateralAddress The address of the token to deposit as collateral
@@ -203,8 +234,6 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__MintFailed();
         }
     }
-
-    function redeemCollateral() external {}
 
     function burnDSC() external {}
 
