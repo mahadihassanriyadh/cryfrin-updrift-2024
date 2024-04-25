@@ -93,7 +93,9 @@ contract DSCEngine is ReentrancyGuard {
         ###################################
     */
     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
-    event CollateralRedeemed(address indexed user, address indexed token, uint256 indexed amount);
+    event CollateralRedeemed(
+        address indexed redeemedFrom, address indexed redeemedTo, address indexed token, uint256 amount
+    );
 
     /*  
         ####################################
@@ -183,23 +185,7 @@ contract DSCEngine is ReentrancyGuard {
         moreThanZero(_amountCollateral)
         nonReentrant
     {
-        // here we are relying on the solidity compiler a little bit as well
-        // if someone tries to pull out more collateral than they have, then the transfer should fail or revert
-        // For example I want to pull out $1000 however I only have $500 in the system
-        // 500 - 1000 = -500, will REVERT ❌
-        // This is only possible with newer versions of solidity with safemath built in
-        s_collateralDeposited[msg.sender][_tokenCollateralAddress] -= _amountCollateral;
-        emit CollateralRedeemed(msg.sender, _tokenCollateralAddress, _amountCollateral);
-
-        // we could calculate the health factor here, but which is gas inefficient
-        // so we will do the transfer first, and then check the health factor
-        // all will be revert anyway if the health factor is broken
-
-        bool success = IERC20(_tokenCollateralAddress).transfer(msg.sender, _amountCollateral);
-        if (!success) {
-            revert DSCEngine__TransferFailed();
-        }
-
+        _redeemCollateral(_tokenCollateralAddress, _amountCollateral, msg.sender, msg.sender);
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
@@ -340,10 +326,13 @@ contract DSCEngine is ReentrancyGuard {
         // 4. We also give 10% bonus to the liquidator
         // so we are giving the liquidator $110 worth of ETH for $100 worth of DSC
         // ⭐️ we should also implement a feature to liquidate in the event the protocol is insolvent
-        // ⭐️ And sweep extra amounts into a treasury 
+        // ⭐️ And sweep extra amounts into a treasury
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
 
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+
+        // 5. We redeem the collateral from the user
+        _redeemCollateral(_collateral, totalCollateralToRedeem, _user, msg.sender);
     }
 
     /*  
@@ -374,6 +363,40 @@ contract DSCEngine is ReentrancyGuard {
         ########### 📥 Private & Internal View Functions ###########
         ############################################################
     */
+    /**
+     *
+     * @param _tokenCollateralAddress The address of the token to redeem as collateral
+     * @param _amountCollateral The amount of collateral to redeem
+     * @param _from The address to redeem the collateral from
+     * @param _to The address to send the collateral to
+     * 
+     * @notice this is an internal function, which we can use to redeem collateral from anybody
+     */
+    function _redeemCollateral(address _tokenCollateralAddress, uint256 _amountCollateral, address _from, address _to)
+        private
+        moreThanZero(_amountCollateral)
+        nonReentrant
+    {
+        // here we are relying on the solidity compiler a little bit as well
+        // if someone tries to pull out more collateral than they have, then the transfer should fail or revert
+        // For example I want to pull out $1000 however I only have $500 in the system
+        // 500 - 1000 = -500, will REVERT ❌
+        // This is only possible with newer versions of solidity with safemath built in
+        s_collateralDeposited[_from][_tokenCollateralAddress] -= _amountCollateral;
+        emit CollateralRedeemed(_from, _to, _tokenCollateralAddress, _amountCollateral);
+
+        // we could calculate the health factor here, but which is gas inefficient
+        // so we will do the transfer first, and then check the health factor
+        // all will be revert anyway if the health factor is broken
+
+        bool success = IERC20(_tokenCollateralAddress).transfer(_to, _amountCollateral);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+
+        _revertIfHealthFactorIsBroken(msg.sender);
+    }
+
     function _getAccountInfo(address _user)
         internal
         view
