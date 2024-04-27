@@ -20,14 +20,8 @@ contract TestContractTest is Test {
         assert(fuzzInvariantTestContract.shouldAlwaysBeZero() == 0);
     }
 
-    function testIAlwaysGetZeroFuzz() public {
-        uint256 data = 0;
-        fuzzInvariantTestContract.doStuff(data);
-        assert(fuzzInvariantTestContract.shouldAlwaysBeZero() == 0);
-    }
-
-    function testIAlwaysGetZeroFuzz2() public {
-        uint256 data = 0;
+    function testIAlwaysGetZeroFuzz(uint256 data) public {
+        // uint256 data = 0;
         fuzzInvariantTestContract.doStuff(data);
         assert(fuzzInvariantTestContract.shouldAlwaysBeZero() == 0);
     }
