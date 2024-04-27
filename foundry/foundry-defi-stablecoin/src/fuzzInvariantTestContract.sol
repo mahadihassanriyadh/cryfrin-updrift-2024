@@ -7,12 +7,16 @@ contract FuzzInvariantTestContract {
     uint256 private hiddenValue = 0;
 
     function doStuff(uint256 data) public {
+        // 🐞 BUG 1
         // if (data == 2) {
         //     shouldAlwaysBeZero = 1;
         // }
-        if (hiddenValue == 7) {
-            shouldAlwaysBeZero = 1;
-        }
+
+        // 🐞 BUG 2
+        // if (hiddenValue == 7) {
+        //     shouldAlwaysBeZero = 1;
+        // }
+        
         hiddenValue = data;
     }
 }
