@@ -54,7 +54,7 @@ contract DSCEngineTest is Test {
     */
     function testGetUsdValue() public {
         uint256 ethAmount = 15e18;
-        // 15e18 * 2500/ETH = 37500e18
+        // 15e18 * 2500/ETH = 37500e18 USD
         uint256 expectedUsdValue = 37500e18;
         uint256 actualUsdValue = engine.getUsdValue(weth, ethAmount);
         assertEq(actualUsdValue, expectedUsdValue, "USD value of 15 ETH should be 37500");
@@ -64,6 +64,14 @@ contract DSCEngineTest is Test {
         expectedUsdValue = 130000e8;
         actualUsdValue = engine.getUsdValue(wbtc, btcAmount);
         assertEq(actualUsdValue, expectedUsdValue, "USD value of 2 BTC should be 130000");
+    }
+
+    function testGetTokenAmountFromUsd() public {
+        uint256 usdAmount = 37500 ether;
+        // 37500e18 / 2500/ETH = 15e18 ETH
+        uint256 expectedTokenAmount = 15 ether;
+        uint256 actualTokenAmount = engine.getTokenAmountFromUsd(weth, usdAmount);
+        assertEq(actualTokenAmount, expectedTokenAmount, "Token amount of 37500 USD should be 15 ETH");
     }
 
     /*  
