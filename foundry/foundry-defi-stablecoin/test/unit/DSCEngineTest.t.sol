@@ -33,6 +33,22 @@ contract DSCEngineTest is Test {
 
     /*  
         #####################################
+        ######## 🧱 Constructor Test ########
+        #####################################
+    */
+    address[] public tokenAddresses;
+    address[] public priceFeedAddresses;
+
+    function testRevertsIfTokenLenDoesntMatchPriceFeedLen() public {
+        tokenAddresses.push(weth);
+        priceFeedAddresses.push(wethUsdPriceFeed);
+        priceFeedAddresses.push(wbtcUsdPriceFeed);
+        vm.expectRevert(DSCEngine.DSCEngine__TokenAndPriceFeedLengthMismatch.selector);
+        engine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
+    }
+
+    /*  
+        #####################################
         ######## 💰 Price Feed Tests ########
         #####################################
     */
