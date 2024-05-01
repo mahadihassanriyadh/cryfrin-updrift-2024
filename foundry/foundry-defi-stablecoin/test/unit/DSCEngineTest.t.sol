@@ -22,6 +22,10 @@ contract DSCEngineTest is Test {
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
+    uint256 public constant MAX_DSC_MINT_BY_USER = 12500 ether; // 50% of collateral value, here 12,5000 ether meaning 12,500 DSC ~ 12,500 USD
+    uint256 public constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
+    uint256 public constant LIQUIDATION_PRECISION = 100;
+    uint256 public constant PRECISION = 1e18;
 
     function setUp() public {
         deployer = new DeployDSC();
@@ -79,6 +83,14 @@ contract DSCEngineTest is Test {
         ######## Deposit Collateral Tests ########
         ##########################################
     */
+    modifier depositedCollateral() {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+        _;
+    }
+
     function testRevertsIfCollateralAmountIsZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -99,19 +111,34 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    modifier depositedCollateral() {
-        vm.startPrank(USER);
-        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
-        engine.depositCollateral(weth, AMOUNT_COLLATERAL);
-        vm.stopPrank();
-        _;
-    }
-
     function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 expectedTotalDscMinted = 0;
         uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
         assertEq(totalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 0");
         assertEq(collateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
+    }
+
+    /*  
+        ################################
+        ######## Mint DSC Tests ########
+        ################################
+    */
+    function testRevertsIfCollateralValueIsZero() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
+        engine.mintDSC(0);
+        vm.stopPrank();
+    }
+
+    function testMintRevertsIfHealthFactorBreaks() public depositedCollateral {
+        (, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        vm.startPrank(USER);
+        uint256 dscToMint = MAX_DSC_MINT_BY_USER + 1 ether;
+        uint256 collateralThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        uint256 expectedHealthFactor = (collateralThreshold * PRECISION) / dscToMint;
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
+        engine.mintDSC(dscToMint);
+        vm.stopPrank();
     }
 }

@@ -68,6 +68,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk(uint256 healthFactor);
     error DSCEngine__HealthFactorNotImproved(uint256 healthFactor);
+    error DSCEngine__NotEnoughDscMinted(uint256 totalDscMinted);
 
     /*  
         ####################################
@@ -457,6 +458,9 @@ contract DSCEngine is ReentrancyGuard {
         // return collateralValueInUsd / totalDscMinted = 500 / 100 = 5
         // So, the health factor is 5, User is OVERCOLLATERALIZED!!!!!!!!! ✅
 
+        if (totalDscMinted <= 0) {
+            revert DSCEngine__NotEnoughDscMinted(totalDscMinted);
+        }
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
 
@@ -540,5 +544,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function getAccountInfo(address _user) public view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
         (totalDscMinted, collateralValueInUsd) = _getAccountInfo(_user);
+    }
+
+    function getHealthFactor(address _user) public view returns (uint256) {
+        return _healthFactor(_user);
     }
 }
