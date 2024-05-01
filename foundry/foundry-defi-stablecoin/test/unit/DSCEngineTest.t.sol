@@ -124,6 +124,13 @@ contract DSCEngineTest is Test {
         ######## Mint DSC Tests ########
         ################################
     */
+    modifier mintedDSC() {
+        vm.startPrank(USER);
+        engine.mintDSC(MAX_DSC_MINT_BY_USER);
+        vm.stopPrank();
+        _;
+    }
+
     function testRevertsIfCollateralValueIsZero() public {
         vm.startPrank(USER);
         vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
@@ -140,5 +147,13 @@ contract DSCEngineTest is Test {
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
         engine.mintDSC(dscToMint);
         vm.stopPrank();
+    }
+
+    function testCanMintDSCAndGetAccountInfo() public depositedCollateral mintedDSC {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        uint256 expectedTotalDscMinted = MAX_DSC_MINT_BY_USER;
+        uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        assertEq(collateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
+        assertEq(totalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 12500");
     }
 }
