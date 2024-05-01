@@ -330,7 +330,7 @@ contract DSCEngine is ReentrancyGuard {
 
         // 7. We check the health factor of the user again
         uint256 endingUserHealthFactor = _healthFactor(_user);
-        if(endingUserHealthFactor <= startingUserHealthFactor) {
+        if (endingUserHealthFactor <= startingUserHealthFactor) {
             revert DSCEngine__HealthFactorNotImproved(endingUserHealthFactor);
         }
 
@@ -536,5 +536,9 @@ contract DSCEngine is ReentrancyGuard {
         // Diving with 1e18 would nullify the effect of one of the multiplication
         // So our returned value would be in 18 decimal points instead of 36
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
+    }
+
+    function getAccountInfo(address _user) public view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
+        (totalDscMinted, collateralValueInUsd) = _getAccountInfo(_user);
     }
 }
