@@ -184,7 +184,7 @@ contract DSCEngineTest is Test {
             - Total DSC minted = 10,000 DSC = 10,000 USD
             - To maintain 200% collateralization, we have to keep at least, (Total DSC minted * 2 = 20,000 USD)
             - So, we can redeem 5,000 USD worth of collateral without breaking the health factor
-            - But here we are trying to redeem 5,250 USD worth of collateral, which will break the health factor
+            - But here we are trying to redeem 5,250 USD worth of collateral, 
         */
         uint256 collateralAfterRedeem = collateralValueInUsd - 5250 ether;
         uint256 expectedHealthFactor = calculateHealthFactor(collateralAfterRedeem, totalDscMinted);
@@ -192,7 +192,7 @@ contract DSCEngineTest is Test {
         engine.redeemCollateral(weth, 2.1 ether);
         vm.stopPrank();
     }
-`
+
     /*  
         ##################################
         ######## Helper Functions ########
