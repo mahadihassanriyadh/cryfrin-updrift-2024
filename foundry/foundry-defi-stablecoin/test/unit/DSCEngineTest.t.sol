@@ -23,6 +23,7 @@ contract DSCEngineTest is Test {
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
     uint256 public constant MAX_DSC_MINT_BY_USER = 12500 ether; // 50% of collateral value, here 12,5000 ether meaning 12,500 DSC ~ 12,500 USD
+    uint256 public constant INITIAL_DSC_MINT = 10000 ether; // means 8,000 DSC ~ 8,000 USD, ether is just another way of writing wei or 1e18
     uint256 public constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
     uint256 public constant LIQUIDATION_PRECISION = 100;
     uint256 public constant PRECISION = 1e18;
@@ -126,7 +127,7 @@ contract DSCEngineTest is Test {
     */
     modifier mintedDSC() {
         vm.startPrank(USER);
-        engine.mintDSC(MAX_DSC_MINT_BY_USER);
+        engine.mintDSC(INITIAL_DSC_MINT);
         vm.stopPrank();
         _;
     }
@@ -150,7 +151,7 @@ contract DSCEngineTest is Test {
 
     function testCanMintDSCAndGetAccountInfo() public depositedCollateral mintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
-        uint256 expectedTotalDscMinted = MAX_DSC_MINT_BY_USER;
+        uint256 expectedTotalDscMinted = INITIAL_DSC_MINT;
         uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
         assertEq(collateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
         assertEq(totalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 12500");
@@ -175,15 +176,23 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    // function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
-    //     (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
-    //     vm.startPrank(USER);
-    //     // collateralAfterRedeem
-    //     uint256 collateralAfterRedeem = collateralValueInUsd - 1 ether;
-    //     uint256 collateralThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-    //     uint256 expectedHealthFactor = (collateralThreshold * PRECISION) / totalDscMinted;
-    // }
-
+    function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        vm.startPrank(USER);
+        /*  
+            - Collateral value = 10 ETH = 10 * 2500 = 25,000 USD
+            - Total DSC minted = 10,000 DSC = 10,000 USD
+            - To maintain 200% collateralization, we have to keep at least, (Total DSC minted * 2 = 20,000 USD)
+            - So, we can redeem 5,000 USD worth of collateral without breaking the health factor
+            - But here we are trying to redeem 5,250 USD worth of collateral, which will break the health factor
+        */
+        uint256 collateralAfterRedeem = collateralValueInUsd - 5250 ether;
+        uint256 expectedHealthFactor = calculateHealthFactor(collateralAfterRedeem, totalDscMinted);
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
+        engine.redeemCollateral(weth, 2.1 ether);
+        vm.stopPrank();
+    }
+`
     /*  
         ##################################
         ######## Helper Functions ########
