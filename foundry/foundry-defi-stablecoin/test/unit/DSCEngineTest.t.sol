@@ -175,4 +175,8 @@ contract DSCEngineTest is Test {
         engine.redeemCollateral(weth, AMOUNT_COLLATERAL + 1);
         vm.stopPrank();
     }
+
+    function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
+        (, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+    }
 }
