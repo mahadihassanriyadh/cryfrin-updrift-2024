@@ -186,11 +186,26 @@ contract DSCEngineTest is Test {
             - So, we can redeem 5,000 USD worth of collateral without breaking the health factor
             - But here we are trying to redeem 5,250 USD worth of collateral, 
         */
-        uint256 collateralAfterRedeem = collateralValueInUsd - 5250 ether;
+        uint256 collateralAfterRedeem = collateralValueInUsd - engine.getUsdValue(weth, 2.1 ether);
         uint256 expectedHealthFactor = calculateHealthFactor(collateralAfterRedeem, totalDscMinted);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
         engine.redeemCollateral(weth, 2.1 ether);
         vm.stopPrank();
+    }
+
+    function testRedeemCollateralSuccessfully() public depositedCollateral mintedDSC {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        uint256 collateralToRedeem = 2 ether;
+        uint256 expectedCollateralValue = collateralValueInUsd - engine.getUsdValue(weth, collateralToRedeem);
+        uint256 expectedHealthFactor = calculateHealthFactor(expectedCollateralValue, totalDscMinted);
+        vm.startPrank(USER);
+        engine.redeemCollateral(weth, collateralToRedeem);
+        vm.stopPrank();
+        (uint256 actualTotalDscMinted, uint256 actualCollateralValueInUsd) = engine.getAccountInfo(USER);
+        uint256 actualHealthFactor = calculateHealthFactor(actualCollateralValueInUsd, actualTotalDscMinted);
+        assertEq(actualCollateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 23000");
+        assertEq(actualTotalDscMinted, totalDscMinted, "Total DSC minted should be 12500");
+        assertEq(expectedHealthFactor, actualHealthFactor, "Health factor should be 200%");
     }
 
     /*  
