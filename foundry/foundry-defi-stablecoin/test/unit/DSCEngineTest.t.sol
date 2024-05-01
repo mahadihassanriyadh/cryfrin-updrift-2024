@@ -209,6 +209,38 @@ contract DSCEngineTest is Test {
     }
 
     /*  
+        ###############################
+        ######## Burn DSC Test ########
+        ###############################
+    */
+    function testBurnDscRevertsIfAmountIsZero() public depositedCollateral mintedDSC {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
+        engine.burnDSC(0);
+        vm.stopPrank();
+    }
+
+    function testBurnDscRevertsIfNotEnoughDscMinted() public depositedCollateral mintedDSC {
+        vm.startPrank(USER);
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__NotEnoughDscMinted.selector, INITIAL_DSC_MINT));
+        engine.burnDSC(MAX_DSC_MINT_BY_USER);
+        vm.stopPrank();
+    }
+
+    function testBurnDscSuccessful() public depositedCollateral mintedDSC {
+        uint256 dscToBurn = 5000 ether;
+        uint256 expectedTotalDscMinted = INITIAL_DSC_MINT - dscToBurn;
+        uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        vm.startPrank(USER);
+        dsc.approve(address(engine), dscToBurn);
+        engine.burnDSC(dscToBurn);
+        vm.stopPrank();
+        (uint256 actualTotalDscMinted, uint256 actualCollateralValueInUsd) = engine.getAccountInfo(USER);
+        assertEq(actualTotalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 7500");
+        assertEq(actualCollateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
+    }
+
+    /*  
         ##################################
         ######## Helper Functions ########
         ##################################

@@ -379,6 +379,9 @@ contract DSCEngine is ReentrancyGuard {
      * @dev low-level internal function, do not call unless the function calling it is checking the health factor
      */
     function _burnDSC(uint256 _amountDscToBurn, address onBehalfOf, address dscFrom) private {
+        if(s_DSCMinted[onBehalfOf] < _amountDscToBurn) {
+            revert DSCEngine__NotEnoughDscMinted(s_DSCMinted[onBehalfOf]);
+        }
         s_DSCMinted[onBehalfOf] -= _amountDscToBurn;
         bool success = i_dsc.transferFrom(dscFrom, address(this), _amountDscToBurn);
 
