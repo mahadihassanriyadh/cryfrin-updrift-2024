@@ -142,8 +142,7 @@ contract DSCEngineTest is Test {
         (, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         vm.startPrank(USER);
         uint256 dscToMint = MAX_DSC_MINT_BY_USER + 1 ether;
-        uint256 collateralThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        uint256 expectedHealthFactor = (collateralThreshold * PRECISION) / dscToMint;
+        (uint256 expectedHealthFactor) = calculateHealthFactor(collateralValueInUsd, dscToMint);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
         engine.mintDSC(dscToMint);
         vm.stopPrank();
@@ -158,9 +157,9 @@ contract DSCEngineTest is Test {
     }
 
     /*  
-        ###################################
-        ######## Redeem Collateral ########
-        ###################################
+        #########################################
+        ######## Redeem Collateral Tests ########
+        #########################################
     */
     function testCantRedeemZeroCollateral() public {
         vm.startPrank(USER);
@@ -176,7 +175,29 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
-        (, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+    // function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
+    //     (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+    //     vm.startPrank(USER);
+    //     // collateralAfterRedeem
+    //     uint256 collateralAfterRedeem = collateralValueInUsd - 1 ether;
+    //     uint256 collateralThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+    //     uint256 expectedHealthFactor = (collateralThreshold * PRECISION) / totalDscMinted;
+    // }
+
+    /*  
+        ##################################
+        ######## Helper Functions ########
+        ##################################
+    */
+    function calculateHealthFactor(uint256 _collateralValueInUsd, uint256 _totalDscMinted)
+        public
+        pure
+        returns (uint256)
+    {
+        if (_totalDscMinted == 0) {
+            return type(uint256).max;
+        }
+        uint256 collateralThreshold = (_collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralThreshold * PRECISION) / _totalDscMinted;
     }
 }
