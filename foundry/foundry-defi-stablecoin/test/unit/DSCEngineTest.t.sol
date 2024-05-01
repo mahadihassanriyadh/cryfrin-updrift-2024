@@ -20,6 +20,7 @@ contract DSCEngineTest is Test {
     address wbtc;
 
     address public USER = makeAddr("user");
+    address public LIQUIDATOR = makeAddr("liquidator");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
     uint256 public constant MAX_DSC_MINT_BY_USER = 12500 ether; // 50% of collateral value, here 12,5000 ether meaning 12,500 DSC ~ 12,500 USD
@@ -229,6 +230,7 @@ contract DSCEngineTest is Test {
 
     function testBurnDscSuccessful() public depositedCollateral mintedDSC {
         uint256 dscToBurn = 5000 ether;
+        console.log("Total Supppplyyyyyy", dsc.totalSupply());
         uint256 expectedTotalDscMinted = INITIAL_DSC_MINT - dscToBurn;
         uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
         vm.startPrank(USER);
@@ -238,6 +240,29 @@ contract DSCEngineTest is Test {
         (uint256 actualTotalDscMinted, uint256 actualCollateralValueInUsd) = engine.getAccountInfo(USER);
         assertEq(actualTotalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 7500");
         assertEq(actualCollateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
+    }
+
+    /*  
+        ##################################
+        ######## Liquidate Tests #########
+        ##################################
+    */
+    modifier liquidator() {
+        ERC20Mock(weth).mint(LIQUIDATOR, STARTING_ERC20_BALANCE * 2);
+        vm.startPrank(LIQUIDATOR);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL * 2);
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL * 2);
+        engine.mintDSC(INITIAL_DSC_MINT);
+        vm.stopPrank();
+        _;
+    }
+
+    function testLiquidateRevertsIfHealthFactorIsGood() public depositedCollateral mintedDSC liquidator {
+        vm.startPrank(LIQUIDATOR);
+        uint256 userHealthFactor = engine.getHealthFactor(USER);
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
+        engine.liquidate(weth, USER, 6000 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
+        vm.stopPrank();
     }
 
     /*  

@@ -343,29 +343,6 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     /*  
-        There should be a health factor to know the health of the system or protocol.
-
-        Again back to our previous example:
-        I had:
-        - $100 worth of ETH collateral
-        - $50 worth of DSC
-
-        We set a threshold of 150% maximum collateralization ratio.
-        Now I have, let's say:
-        - $74 worth of ETH collateral
-        - $50 worth of DSC
-        I am UNDERCOLLATERALIZED!!!!!!!!!
-
-        Now, someone can call the liquidate() function to liquidate my DSC to save the system.
-        - Someone will say, I'll pay back the $50 DSC and get all your Collateral (ETH).
-        - So that someone is getting $74 worth of ETH by paying $50 DSC.
-        - He/she is getting $24 profit.
-        - And I am out of the system.
-        - This is my punishment for being undercollateralized. 
-    */
-    function getHealthFacoctor() external view {}
-
-    /*  
         ############################################################
         ########### 📥 Private & Internal View Functions ###########
         ############################################################
@@ -379,7 +356,7 @@ contract DSCEngine is ReentrancyGuard {
      * @dev low-level internal function, do not call unless the function calling it is checking the health factor
      */
     function _burnDSC(uint256 _amountDscToBurn, address onBehalfOf, address dscFrom) private {
-        if(s_DSCMinted[onBehalfOf] < _amountDscToBurn) {
+        if (s_DSCMinted[onBehalfOf] < _amountDscToBurn) {
             revert DSCEngine__NotEnoughDscMinted(s_DSCMinted[onBehalfOf]);
         }
         s_DSCMinted[onBehalfOf] -= _amountDscToBurn;
@@ -448,6 +425,27 @@ contract DSCEngine is ReentrancyGuard {
      * - The value of all collateral
      * - The value of all DSC
      */
+    /*  
+        There should be a health factor to know the health of the system or protocol.
+
+        Again back to our previous example:
+        I had:
+        - $100 worth of ETH collateral
+        - $50 worth of DSC
+
+        We set a threshold of 150% maximum collateralization ratio.
+        Now I have, let's say:
+        - $74 worth of ETH collateral
+        - $50 worth of DSC
+        I am UNDERCOLLATERALIZED!!!!!!!!!
+
+        Now, someone can call the liquidate() function to liquidate my DSC to save the system.
+        - Someone will say, I'll pay back the $50 DSC and get all your Collateral (ETH).
+        - So that someone is getting $74 worth of ETH by paying $50 DSC.
+        - He/she is getting $24 profit.
+        - And I am out of the system.
+        - This is my punishment for being undercollateralized. 
+    */
     function _healthFactor(address _user) internal view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInfo(_user);
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
@@ -552,5 +550,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function getAccountInfo(address _user) public view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
         (totalDscMinted, collateralValueInUsd) = _getAccountInfo(_user);
+    }
+
+    function getHealthFactor(address _user) public view returns (uint256) {
+        return _healthFactor(_user);
     }
 }
