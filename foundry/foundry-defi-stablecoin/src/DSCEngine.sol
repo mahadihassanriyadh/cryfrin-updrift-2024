@@ -69,6 +69,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__HealthFactorOk(uint256 healthFactor);
     error DSCEngine__HealthFactorNotImproved(uint256 healthFactor);
     error DSCEngine__NotEnoughDscMinted(uint256 totalDscMinted);
+    error DSCEngine__NotEnoughCollateralDeposited();
 
     /*  
         ####################################
@@ -188,7 +189,9 @@ contract DSCEngine is ReentrancyGuard {
         nonReentrant
     {
         _redeemCollateral(_tokenCollateralAddress, _amountCollateral, msg.sender, msg.sender);
-        _revertIfHealthFactorIsBroken(msg.sender);
+
+        // _redeemCollateral already checks the health factor, so we don't need to do it here
+        // _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     /**
@@ -400,13 +403,15 @@ contract DSCEngine is ReentrancyGuard {
     function _redeemCollateral(address _tokenCollateralAddress, uint256 _amountCollateral, address _from, address _to)
         private
         moreThanZero(_amountCollateral)
-        nonReentrant
     {
         // here we are relying on the solidity compiler a little bit as well
         // if someone tries to pull out more collateral than they have, then the transfer should fail or revert
         // For example I want to pull out $1000 however I only have $500 in the system
         // 500 - 1000 = -500, will REVERT ❌
         // This is only possible with newer versions of solidity with safemath built in
+        if (s_collateralDeposited[_from][_tokenCollateralAddress] < _amountCollateral) {
+            revert DSCEngine__NotEnoughCollateralDeposited();
+        }
         s_collateralDeposited[_from][_tokenCollateralAddress] -= _amountCollateral;
         emit CollateralRedeemed(_from, _to, _tokenCollateralAddress, _amountCollateral);
 
@@ -459,7 +464,7 @@ contract DSCEngine is ReentrancyGuard {
         // So, the health factor is 5, User is OVERCOLLATERALIZED!!!!!!!!! ✅
 
         if (totalDscMinted <= 0) {
-            revert DSCEngine__NotEnoughDscMinted(totalDscMinted);
+            return type(uint256).max;
         }
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }

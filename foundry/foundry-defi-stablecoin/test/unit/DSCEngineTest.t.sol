@@ -156,4 +156,23 @@ contract DSCEngineTest is Test {
         assertEq(collateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
         assertEq(totalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 12500");
     }
+
+    /*  
+        ###################################
+        ######## Redeem Collateral ########
+        ###################################
+    */
+    function testCantRedeemZeroCollateral() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
+        engine.redeemCollateral(weth, 0);
+        vm.stopPrank();
+    }
+
+    function testCantRedeemCollateralBeforeMintIfNotEnoughCollateralDeposited() public depositedCollateral {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NotEnoughCollateralDeposited.selector);
+        engine.redeemCollateral(weth, AMOUNT_COLLATERAL + 1);
+        vm.stopPrank();
+    }
 }
