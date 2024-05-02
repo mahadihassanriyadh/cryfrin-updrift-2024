@@ -228,7 +228,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testBurnDscSuccessful() public depositedCollateral mintedDSC {
+    function testCanBurn() public depositedCollateral mintedDSC {
         uint256 dscToBurn = 5000 ether;
         console.log("Total Supppplyyyyyy", dsc.totalSupply());
         uint256 expectedTotalDscMinted = INITIAL_DSC_MINT - dscToBurn;
@@ -248,10 +248,10 @@ contract DSCEngineTest is Test {
         ##################################
     */
     modifier liquidator() {
-        ERC20Mock(weth).mint(LIQUIDATOR, STARTING_ERC20_BALANCE * 2);
+        ERC20Mock(weth).mint(LIQUIDATOR, STARTING_ERC20_BALANCE * 10);
         vm.startPrank(LIQUIDATOR);
-        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL * 2);
-        engine.depositCollateral(weth, AMOUNT_COLLATERAL * 2);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL * 10);
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL * 10);
         engine.mintDSC(INITIAL_DSC_MINT);
         vm.stopPrank();
         _;
@@ -262,6 +262,16 @@ contract DSCEngineTest is Test {
         uint256 userHealthFactor = engine.getHealthFactor(USER);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
         engine.liquidate(weth, USER, 6000 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
+        vm.stopPrank();
+    }
+
+    function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
+        config.updateAnvilEthPriceFeed(1000e8);
+        vm.startPrank(LIQUIDATOR);
+        uint256 userHealthFactor = engine.getHealthFactor(USER);
+        console.log("User Health Factor", userHealthFactor);
+        // vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
+        // engine.liquidate(weth, USER, 6000 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
         vm.stopPrank();
     }
 
