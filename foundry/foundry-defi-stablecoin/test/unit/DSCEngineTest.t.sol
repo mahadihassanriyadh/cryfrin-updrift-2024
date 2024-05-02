@@ -127,13 +127,6 @@ contract DSCEngineTest is Test {
         ######## Mint DSC Tests ########
         ################################
     */
-    modifier mintedDSC() {
-        vm.startPrank(USER);
-        engine.mintDSC(INITIAL_DSC_MINT);
-        vm.stopPrank();
-        _;
-    }
-
     function testRevertsIfCollateralValueIsZero() public {
         vm.startPrank(USER);
         vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
@@ -151,7 +144,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCanMintDSCAndGetAccountInfo() public depositedCollateral mintedDSC {
+    function testCanMintDSCAndGetAccountInfo() public depositedCollateralAndMintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 expectedTotalDscMinted = INITIAL_DSC_MINT;
         uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
@@ -199,7 +192,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateral mintedDSC {
+    function testCantRedeemCollateralIfHealthFactorBreaks() public depositedCollateralAndMintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         vm.startPrank(USER);
         /*  
@@ -216,7 +209,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCanRedeemCollateral() public depositedCollateral mintedDSC {
+    function testCanRedeemCollateral() public depositedCollateralAndMintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 collateralToRedeem = 2 ether;
         uint256 expectedCollateralValue = collateralValueInUsd - engine.getUsdValue(weth, collateralToRedeem);
@@ -236,21 +229,21 @@ contract DSCEngineTest is Test {
         ######## Burn DSC Test ########
         ###############################
     */
-    function testBurnDscRevertsIfAmountIsZero() public depositedCollateral mintedDSC {
+    function testBurnDscRevertsIfAmountIsZero() public depositedCollateralAndMintedDSC {
         vm.startPrank(USER);
         vm.expectRevert(DSCEngine.DSCEngine__AmmountMustBeMoreThanZero.selector);
         engine.burnDSC(0);
         vm.stopPrank();
     }
 
-    function testBurnDscRevertsIfNotEnoughDscMinted() public depositedCollateral mintedDSC {
+    function testBurnDscRevertsIfNotEnoughDscMinted() public depositedCollateralAndMintedDSC {
         vm.startPrank(USER);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__NotEnoughDscMinted.selector, INITIAL_DSC_MINT));
         engine.burnDSC(MAX_DSC_MINT_BY_USER);
         vm.stopPrank();
     }
 
-    function testCanBurn() public depositedCollateral mintedDSC {
+    function testCanBurn() public depositedCollateralAndMintedDSC {
         uint256 dscToBurn = 5000 ether;
         console.log("Total Supppplyyyyyy", dsc.totalSupply());
         uint256 expectedTotalDscMinted = INITIAL_DSC_MINT - dscToBurn;
@@ -279,7 +272,7 @@ contract DSCEngineTest is Test {
         _;
     }
 
-    function testLiquidateRevertsIfHealthFactorIsGood() public depositedCollateral mintedDSC liquidator {
+    function testLiquidateRevertsIfHealthFactorIsGood() public depositedCollateralAndMintedDSC liquidator {
         vm.startPrank(LIQUIDATOR);
         uint256 userHealthFactor = engine.getHealthFactor(USER);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
@@ -287,7 +280,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
+    function testCanLiquidate() public depositedCollateralAndMintedDSC liquidator {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
