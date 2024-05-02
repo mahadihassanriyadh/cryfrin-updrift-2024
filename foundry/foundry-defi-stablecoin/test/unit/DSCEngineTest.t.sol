@@ -164,11 +164,15 @@ contract DSCEngineTest is Test {
         ######## Deposit Collateral & Mint DSC Tests ########
         #####################################################
     */
-    function testCanDepositCollateralAndMintDsc() public {
+    modifier depositedCollateralAndMintedDSC() {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
         vm.stopPrank();
+        _;
+    }
+
+    function testCanDepositCollateralAndMintDsc() public depositedCollateralAndMintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 expectedTotalDscMinted = INITIAL_DSC_MINT;
         uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
@@ -283,23 +287,23 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    // function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
-    //     vm.startPrank(USER);
-    //     ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
-    //     engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
-    //     vm.stopPrank();
-    //     int256 ethUsdUpdatedPrice = 180e8; // 1 ETH = $180
-    //     MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+    function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
+        vm.stopPrank();
+        int256 ethUsdUpdatedPrice = 180e8; // 1 ETH = $180
+        MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
 
-    //     uint256 userHealthFactor = engine.getHealthFactor(USER);
-    //     console.log("User Health Factor", userHealthFactor);
-    //     uint256 liquidateAmount = 2000 ether;
-    //     vm.startPrank(address(engine));
-    //     ERC20Mock(weth).approve(LIQUIDATOR, liquidateAmount * 10);
-    //     vm.startPrank(LIQUIDATOR);
-    //     engine.liquidate(weth, USER, 1 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
-    //     vm.stopPrank();
-    // }
+        // uint256 userHealthFactor = engine.getHealthFactor(USER);
+        // console.log("User Health Factor", userHealthFactor);
+        // uint256 liquidateAmount = 2000 ether;
+        // vm.startPrank(address(engine));
+        // ERC20Mock(weth).approve(LIQUIDATOR, liquidateAmount * 10);
+        // vm.startPrank(LIQUIDATOR);
+        // engine.liquidate(weth, USER, 1 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
+        // vm.stopPrank();
+    }
 
     /*  
         ##################################
