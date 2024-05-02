@@ -29,7 +29,7 @@ contract DSCEngineTest is Test {
     uint256 public constant LIQUIDATOR_COLLATERAL_TO_COVER = 80 ether;
     uint256 public constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
     uint256 public constant LIQUIDATION_PRECISION = 100;
-    
+
     uint256 public constant PRECISION = 1e18;
 
     function setUp() public {
@@ -285,17 +285,34 @@ contract DSCEngineTest is Test {
     }
 
     function testCanLiquidate() public depositedCollateralAndMintedDSC liquidator {
-        int256 ethUsdUpdatedPrice = 180e8; // 1 ETH = $180
+        int256 ethUsdUpdatedPrice = 1500e8; // 1 ETH = $1500
         MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
 
         uint256 userHealthFactor = engine.getHealthFactor(USER);
         console.log("User Health Factor", userHealthFactor);
-        // uint256 liquidateAmount = 2000 ether;
-        // vm.startPrank(address(engine));
-        // ERC20Mock(weth).approve(LIQUIDATOR, liquidateAmount * 10);
-        // vm.startPrank(LIQUIDATOR);
-        // engine.liquidate(weth, USER, 1 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
-        // vm.stopPrank();
+        
+        vm.startPrank(LIQUIDATOR);
+        // fully liquidate the user by covering all their debt
+        dsc.approve(address(engine), USER_INITIAL_DSC_MINT);
+        engine.liquidate(weth, USER, USER_INITIAL_DSC_MINT);
+        vm.stopPrank();
+
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        console.log("Total DSC Minted by USER", totalDscMinted);
+        console.log("Collateral Value in USD by USER", collateralValueInUsd);
+        // assertEq(totalDscMinted, 0, "Total DSC minted should be 0");
+        // assertEq(collateralValueInUsd, 0, "Collateral value in USD should be 0");
+
+        // check if liquidator has received the DSC
+        (uint256 liquidatorTotalDscMinted, uint256 liquidatorCollateralValueInUsd) = engine.getAccountInfo(LIQUIDATOR);
+        console.log("Liquidator Total DSC Minted by LIQUIDATOR", liquidatorTotalDscMinted);
+        console.log("Liquidator Collateral Value in USD by LIQUIDATOR", liquidatorCollateralValueInUsd);
+
+        uint256 userHealthFactorAfterLiquidation = engine.getHealthFactor(USER);
+        console.log("User Health Factor After Liquidation", userHealthFactorAfterLiquidation);
+
+        uint256 liquidatorHealthFactor = engine.getHealthFactor(LIQUIDATOR);
+        console.log("Liquidator Health Factor", liquidatorHealthFactor);
     }
 
     /*  
