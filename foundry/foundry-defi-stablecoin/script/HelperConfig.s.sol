@@ -65,8 +65,4 @@ contract HelperConfig is Script {
             deployerKey: DEFAUT_ANVIL_KEY
         });
     }
-
-    function updateAnvilEthPriceFeed(int256 _ethUsdPrice) public {
-        anvilEthUsdPriceFeed.updateAnswer(_ethUsdPrice);
-    }
 }

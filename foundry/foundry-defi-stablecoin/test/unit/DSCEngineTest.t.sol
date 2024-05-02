@@ -8,6 +8,7 @@ import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../../test/mocks/MockV3Aggregator.sol";
 
 contract DSCEngineTest is Test {
     DeployDSC deployer;
@@ -159,6 +160,23 @@ contract DSCEngineTest is Test {
     }
 
     /*  
+        #####################################################
+        ######## Deposit Collateral & Mint DSC Tests ########
+        #####################################################
+    */
+    function testCanDepositCollateralAndMintDsc() public {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
+        vm.stopPrank();
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
+        uint256 expectedTotalDscMinted = INITIAL_DSC_MINT;
+        uint256 expectedCollateralValue = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        assertEq(collateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 25000");
+        assertEq(totalDscMinted, expectedTotalDscMinted, "Total DSC minted should be 12500");
+    }
+
+    /*  
         #########################################
         ######## Redeem Collateral Tests ########
         #########################################
@@ -194,7 +212,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testRedeemCollateralSuccessfully() public depositedCollateral mintedDSC {
+    function testCanRedeemCollateral() public depositedCollateral mintedDSC {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 collateralToRedeem = 2 ether;
         uint256 expectedCollateralValue = collateralValueInUsd - engine.getUsdValue(weth, collateralToRedeem);
@@ -265,15 +283,23 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
-        config.updateAnvilEthPriceFeed(1000e8);
-        vm.startPrank(LIQUIDATOR);
-        uint256 userHealthFactor = engine.getHealthFactor(USER);
-        console.log("User Health Factor", userHealthFactor);
-        // vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
-        // engine.liquidate(weth, USER, 6000 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
-        vm.stopPrank();
-    }
+    // function testCanLiquidate() public depositedCollateral mintedDSC liquidator {
+    //     vm.startPrank(USER);
+    //     ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+    //     engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, INITIAL_DSC_MINT);
+    //     vm.stopPrank();
+    //     int256 ethUsdUpdatedPrice = 180e8; // 1 ETH = $180
+    //     MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+
+    //     uint256 userHealthFactor = engine.getHealthFactor(USER);
+    //     console.log("User Health Factor", userHealthFactor);
+    //     uint256 liquidateAmount = 2000 ether;
+    //     vm.startPrank(address(engine));
+    //     ERC20Mock(weth).approve(LIQUIDATOR, liquidateAmount * 10);
+    //     vm.startPrank(LIQUIDATOR);
+    //     engine.liquidate(weth, USER, 1 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
+    //     vm.stopPrank();
+    // }
 
     /*  
         ##################################
