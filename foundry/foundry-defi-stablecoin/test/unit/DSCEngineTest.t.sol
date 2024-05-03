@@ -21,7 +21,7 @@ contract DSCEngineTest is Test {
     address wbtc;
 
     address public USER = makeAddr("user");
-    uint256 public constant USER_STARTING_ERC20_BALANCE = 10 ether;
+    uint256 public constant USER_STARTING_ERC20_BALANCE = 10 ether; // USER'S initial collateral balance
     uint256 public constant USER_MAX_DSC_MINT = 12500 ether; // 50% of collateral value, here 12,5000 ether meaning 12,500 DSC ~ 12,500 USD
     uint256 public constant USER_INITIAL_DSC_MINT = 10000 ether; // means 10,000 DSC ~ 10,000 USD, "ether" is just another way of writing wei or 1e18
 
@@ -271,7 +271,6 @@ contract DSCEngineTest is Test {
         vm.startPrank(LIQUIDATOR);
         ERC20Mock(weth).approve(address(engine), LIQUIDATOR_COLLATERAL_TO_COVER);
         engine.depositCollateralAndMintDSC(weth, LIQUIDATOR_COLLATERAL_TO_COVER, USER_INITIAL_DSC_MINT);
-        engine.mintDSC(USER_INITIAL_DSC_MINT);
         vm.stopPrank();
         _;
     }
@@ -280,7 +279,7 @@ contract DSCEngineTest is Test {
         vm.startPrank(LIQUIDATOR);
         uint256 userHealthFactor = engine.getHealthFactor(USER);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, userHealthFactor));
-        engine.liquidate(weth, USER, 6000 ether); // liquidator is trying to liquidate 6000 USD worth of DSC
+        engine.liquidate(weth, USER, USER_INITIAL_DSC_MINT); // liquidator is trying to fully liquidate the user
         vm.stopPrank();
     }
 
@@ -290,7 +289,7 @@ contract DSCEngineTest is Test {
 
         uint256 userHealthFactor = engine.getHealthFactor(USER);
         console.log("User Health Factor", userHealthFactor);
-        
+
         vm.startPrank(LIQUIDATOR);
         // fully liquidate the user by covering all their debt
         dsc.approve(address(engine), USER_INITIAL_DSC_MINT);
@@ -303,7 +302,7 @@ contract DSCEngineTest is Test {
         // assertEq(totalDscMinted, 0, "Total DSC minted should be 0");
         // assertEq(collateralValueInUsd, 0, "Collateral value in USD should be 0");
 
-        // check if liquidator has received the DSC
+        console.log("Total Supply", dsc.totalSupply());
         (uint256 liquidatorTotalDscMinted, uint256 liquidatorCollateralValueInUsd) = engine.getAccountInfo(LIQUIDATOR);
         console.log("Liquidator Total DSC Minted by LIQUIDATOR", liquidatorTotalDscMinted);
         console.log("Liquidator Collateral Value in USD by LIQUIDATOR", liquidatorCollateralValueInUsd);
