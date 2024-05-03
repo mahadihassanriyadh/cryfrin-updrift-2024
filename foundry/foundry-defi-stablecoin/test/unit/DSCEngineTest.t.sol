@@ -288,30 +288,12 @@ contract DSCEngineTest is Test {
         MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
 
         uint256 userHealthFactor = engine.getHealthFactor(USER);
-        console.log("User Health Factor", userHealthFactor);
 
         vm.startPrank(LIQUIDATOR);
         // fully liquidate the user by covering all their debt
         dsc.approve(address(engine), USER_INITIAL_DSC_MINT);
         engine.liquidate(weth, USER, USER_INITIAL_DSC_MINT);
         vm.stopPrank();
-
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
-        console.log("Total DSC Minted by USER", totalDscMinted);
-        console.log("Collateral Value in USD by USER", collateralValueInUsd);
-        // assertEq(totalDscMinted, 0, "Total DSC minted should be 0");
-        // assertEq(collateralValueInUsd, 0, "Collateral value in USD should be 0");
-
-        console.log("Total Supply", dsc.totalSupply());
-        (uint256 liquidatorTotalDscMinted, uint256 liquidatorCollateralValueInUsd) = engine.getAccountInfo(LIQUIDATOR);
-        console.log("Liquidator Total DSC Minted by LIQUIDATOR", liquidatorTotalDscMinted);
-        console.log("Liquidator Collateral Value in USD by LIQUIDATOR", liquidatorCollateralValueInUsd);
-
-        uint256 userHealthFactorAfterLiquidation = engine.getHealthFactor(USER);
-        console.log("User Health Factor After Liquidation", userHealthFactorAfterLiquidation);
-
-        uint256 liquidatorHealthFactor = engine.getHealthFactor(LIQUIDATOR);
-        console.log("Liquidator Health Factor", liquidatorHealthFactor);
     }
 
     /*  
