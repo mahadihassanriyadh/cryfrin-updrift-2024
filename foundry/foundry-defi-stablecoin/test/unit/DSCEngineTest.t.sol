@@ -288,6 +288,7 @@ contract DSCEngineTest is Test {
         MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
 
         uint256 userHealthFactor = engine.getHealthFactor(USER);
+        console.log("User Health Factor", userHealthFactor);
 
         vm.startPrank(LIQUIDATOR);
         // fully liquidate the user by covering all their debt
