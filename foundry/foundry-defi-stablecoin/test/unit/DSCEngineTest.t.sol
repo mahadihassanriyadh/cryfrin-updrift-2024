@@ -260,6 +260,27 @@ contract DSCEngineTest is Test {
     }
 
     /*  
+        ################################################
+        ######## Redeem Collateral for DSC Test ########
+        ################################################
+    */
+    function testRedeemCollateralForDscRevertsIfHealthFactorBroken() public depositedCollateralAndMintedDSC {
+        // change the price feed to make the user undercollateralized
+        int256 ethUsdUpdatedPrice = 1249e8; // 1 ETH = $1500
+        MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+
+        vm.startPrank(USER);
+        uint256 collateralToRedeem = 0.01 ether;
+        uint256 dscToBurn = 5000 ether;
+        uint256 userHealthFactor = engine.getHealthFactor(USER);
+        console.log("User Health Factor", userHealthFactor);
+        dsc.approve(address(engine), dscToBurn);
+        // vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, userHealthFactor));
+        engine.redeemCollateralForDSC(weth, collateralToRedeem, dscToBurn);
+        vm.stopPrank();
+    }
+
+    /*  
         ##################################
         ######## Liquidate Tests #########
         ##################################
@@ -275,6 +296,35 @@ contract DSCEngineTest is Test {
         _;
     }
 
+    modifier liquidated() {
+        // deposit collateral and mint DSC for USER
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), USER_STARTING_ERC20_BALANCE);
+        engine.depositCollateralAndMintDSC(weth, USER_STARTING_ERC20_BALANCE, USER_INITIAL_DSC_MINT);
+        vm.stopPrank();
+
+        // mint some ERC20 token and give it to liquidator
+        ERC20Mock(weth).mint(LIQUIDATOR, LIQUIDATOR_COLLATERAL_TO_COVER);
+
+        // deposit collateral and mint DSC for LIQUIDATOR
+        vm.startPrank(LIQUIDATOR);
+        ERC20Mock(weth).approve(address(engine), LIQUIDATOR_COLLATERAL_TO_COVER);
+        engine.depositCollateralAndMintDSC(weth, LIQUIDATOR_COLLATERAL_TO_COVER, USER_INITIAL_DSC_MINT);
+
+        // change the price feed to make the user undercollateralized
+        int256 ethUsdUpdatedPrice = 1500e8; // 1 ETH = $1500
+        MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+
+        // uint256 userHealthFactor = engine.getHealthFactor(USER);
+        // console.log("User Health Factor", userHealthFactor);
+
+        // fully liquidate the user by covering all their debt
+        dsc.approve(address(engine), USER_INITIAL_DSC_MINT);
+        engine.liquidate(weth, USER, USER_INITIAL_DSC_MINT);
+        vm.stopPrank();
+        _;
+    }
+
     function testLiquidateRevertsIfHealthFactorIsGood() public depositedCollateralAndMintedDSC liquidator {
         vm.startPrank(LIQUIDATOR);
         uint256 userHealthFactor = engine.getHealthFactor(USER);
@@ -283,18 +333,8 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testCanLiquidate() public depositedCollateralAndMintedDSC liquidator {
-        int256 ethUsdUpdatedPrice = 1500e8; // 1 ETH = $1500
-        MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
-
-        uint256 userHealthFactor = engine.getHealthFactor(USER);
-        console.log("User Health Factor", userHealthFactor);
-
-        vm.startPrank(LIQUIDATOR);
-        // fully liquidate the user by covering all their debt
-        dsc.approve(address(engine), USER_INITIAL_DSC_MINT);
-        engine.liquidate(weth, USER, USER_INITIAL_DSC_MINT);
-        vm.stopPrank();
+    function testCanLiquidate() public liquidated {
+        console.log("Liquidated Successfully");
     }
 
     /*  

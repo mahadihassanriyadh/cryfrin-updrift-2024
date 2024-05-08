@@ -253,9 +253,6 @@ contract DSCEngine is ReentrancyGuard {
      */
     function burnDSC(uint256 _amount) public moreThanZero(_amount) {
         _burnDSC(_amount, msg.sender, msg.sender);
-        // i don't think we need to check health factor here, because we are burning DSC, not minting
-        // again just to be safe, we will keep it here for now
-        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     /**
