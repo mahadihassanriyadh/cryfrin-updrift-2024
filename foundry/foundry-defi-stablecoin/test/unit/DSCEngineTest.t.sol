@@ -264,18 +264,16 @@ contract DSCEngineTest is Test {
         ######## Redeem Collateral for DSC Test ########
         ################################################
     */
-    function testRedeemCollateralForDscRevertsIfHealthFactorBroken() public depositedCollateralAndMintedDSC {
-        // change the price feed to make the user undercollateralized
-        // int256 ethUsdUpdatedPrice = 1249e8; // 1 ETH = $1500
-        // MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
-
+    function testRedeemCollateralForDscRevertsIfHealthFactorBreaks() public depositedCollateralAndMintedDSC {
         vm.startPrank(USER);
-        uint256 collateralToRedeem = 0.01 ether;
-        uint256 dscToBurn = 5000 ether;
-        uint256 userHealthFactor = engine.getHealthFactor(USER);
-        console.log("User Health Factor", userHealthFactor);
+        uint256 collateralToRedeem = 5 ether;
+        uint256 dscToBurn = 1000 ether;
+        uint256 userHealthFactor = calculateHealthFactor(
+            engine.getUsdValue(weth, USER_STARTING_ERC20_BALANCE - collateralToRedeem),
+            USER_INITIAL_DSC_MINT - dscToBurn
+        );
         dsc.approve(address(engine), dscToBurn);
-        // vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, userHealthFactor));
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, userHealthFactor));
         engine.redeemCollateralForDSC(weth, collateralToRedeem, dscToBurn);
         vm.stopPrank();
     }
@@ -342,15 +340,11 @@ contract DSCEngineTest is Test {
         ######## Helper Functions ########
         ##################################
     */
-    function calculateHealthFactor(uint256 _collateralValueInUsd, uint256 _totalDscMinted)
-        public
-        pure
-        returns (uint256)
-    {
-        if (_totalDscMinted == 0) {
+    function calculateHealthFactor(uint256 _collateralValueInUsd, uint256 _dscMinted) public pure returns (uint256) {
+        if (_dscMinted == 0) {
             return type(uint256).max;
         }
         uint256 collateralThreshold = (_collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        return (collateralThreshold * PRECISION) / _totalDscMinted;
+        return (collateralThreshold * PRECISION) / _dscMinted;
     }
 }
