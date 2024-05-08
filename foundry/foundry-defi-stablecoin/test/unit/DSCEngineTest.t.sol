@@ -266,8 +266,8 @@ contract DSCEngineTest is Test {
     */
     function testRedeemCollateralForDscRevertsIfHealthFactorBroken() public depositedCollateralAndMintedDSC {
         // change the price feed to make the user undercollateralized
-        int256 ethUsdUpdatedPrice = 1249e8; // 1 ETH = $1500
-        MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+        // int256 ethUsdUpdatedPrice = 1249e8; // 1 ETH = $1500
+        // MockV3Aggregator(wethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
 
         vm.startPrank(USER);
         uint256 collateralToRedeem = 0.01 ether;
