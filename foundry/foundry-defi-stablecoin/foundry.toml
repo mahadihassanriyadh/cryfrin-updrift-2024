@@ -11,6 +11,12 @@ remappings = [
 [fuzz]
 runs = 1000
 
+[invariant]
+runs = 128
+depth = 128
+
+fail_on_revert = false
+
 # ffi = true # ❗️Caution: enabling this would allow foundry to run commands directly on your machine. So we should try to keep this disabled as much as possible. But it is important for us to know what it is, how to use it and when we need it. Especially for something like this, to get our most recent deployments.
 
 # instead of ffi = true, we can use the following settings
