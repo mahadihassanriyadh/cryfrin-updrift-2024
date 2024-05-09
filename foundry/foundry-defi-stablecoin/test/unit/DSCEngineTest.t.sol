@@ -30,8 +30,6 @@ contract DSCEngineTest is Test {
     uint256 public constant LIQUIDATION_THRESHOLD = 50; // means we want to 200% overcollateralized
     uint256 public constant LIQUIDATION_PRECISION = 100;
 
-    uint256 public constant PRECISION = 1e18;
-
     function setUp() public {
         deployer = new DeployDSC();
         (dsc, engine, config) = deployer.run();
