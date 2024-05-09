@@ -475,6 +475,25 @@ contract DSCEngine is ReentrancyGuard {
         return (collateralAdjustedForThreshold * PRECISION) / _totalDscMinted;
     }
 
+    function _getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // price is in 8 decimal places
+        // so if 1 ETH = $1000, we would get 1000 * 10e8 here
+        // now if we wanted to calculate the value, we couldn't simply do:
+        //    price * amount (considering amount = 1 ETH = 1 * 1e18 wei)
+        //    because that would mean (1000 * 1e8) * (1 * 1e18)
+        // Which would return a massive number, and we can also see the units don't match up
+        // price is in 8 decimals, whereas amount (eth) is in 18 decimals
+        // so we need to match those as well
+        // so let's first multiply price by 1e10
+        //    (1000 * 1e8 * (1e10)) * (1 * 1e18)
+        // And finally divide the whole thing by 1e18 as we were multiply 1e18 two times, one from price, one from amount
+        // Diving with 1e18 would nullify the effect of one of the multiplication
+        // So our returned value would be in 18 decimal points instead of 36
+        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
+    }
+
     /**
      * @notice need to do two things here:
      * 1. Check health factor (do they have enough collateral to back their DSC?)
@@ -535,28 +554,13 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
-        // price is in 8 decimal places
-        // so if 1 ETH = $1000, we would get 1000 * 10e8 here
-        // now if we wanted to calculate the value, we couldn't simply do:
-        //    price * amount (considering amount = 1 ETH = 1 * 1e18 wei)
-        //    because that would mean (1000 * 1e8) * (1 * 1e18)
-        // Which would return a massive number, and we can also see the units don't match up
-        // price is in 8 decimals, whereas amount (eth) is in 18 decimals
-        // so we need to match those as well
-        // so let's first multiply price by 1e10
-        //    (1000 * 1e8 * (1e10)) * (1 * 1e18)
-        // And finally divide the whole thing by 1e18 as we were multiply 1e18 two times, one from price, one from amount
-        // Diving with 1e18 would nullify the effect of one of the multiplication
-        // So our returned value would be in 18 decimal points instead of 36
-        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * _amount) / PRECISION;
+        return _getUsdValue(_token, _amount);
     }
 
     function getAccountInfo(address _user) public view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
         (totalDscMinted, collateralValueInUsd) = _getAccountInfo(_user);
     }
-    
+
     function getHealthFactor(address _user) public view returns (uint256) {
         return _healthFactor(_user);
     }
