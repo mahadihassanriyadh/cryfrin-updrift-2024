@@ -445,7 +445,17 @@ contract DSCEngine is ReentrancyGuard {
     */
     function _healthFactor(address _user) internal view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInfo(_user);
-        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    }
+
+    function _calculateHealthFactor(uint256 _totalDscMinted, uint256 _collateralValueInUsd)
+        internal
+        pure
+        returns (uint256 healthFactor)
+    {
+        if (_totalDscMinted <= 0) {
+            return type(uint256).max;
+        }
 
         // let, totalDscMinted = $100, collateralValueInUsd = $150
         // collateralAdjustedForThreshold = 150 * (50 / 100) = 75
@@ -461,10 +471,8 @@ contract DSCEngine is ReentrancyGuard {
         // return collateralValueInUsd / totalDscMinted = 500 / 100 = 5
         // So, the health factor is 5, User is OVERCOLLATERALIZED!!!!!!!!! ✅
 
-        if (totalDscMinted <= 0) {
-            return type(uint256).max;
-        }
-        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+        uint256 collateralAdjustedForThreshold = (_collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralAdjustedForThreshold * PRECISION) / _totalDscMinted;
     }
 
     /**
@@ -548,8 +556,16 @@ contract DSCEngine is ReentrancyGuard {
     function getAccountInfo(address _user) public view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
         (totalDscMinted, collateralValueInUsd) = _getAccountInfo(_user);
     }
-
+    
     function getHealthFactor(address _user) public view returns (uint256) {
         return _healthFactor(_user);
+    }
+
+    function calculateHealthFactor(uint256 _totalDscMinted, uint256 _collateralValueInUsd)
+        external
+        pure
+        returns (uint256)
+    {
+        return _calculateHealthFactor(_totalDscMinted, _collateralValueInUsd);
     }
 }

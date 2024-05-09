@@ -140,7 +140,7 @@ contract DSCEngineTest is Test {
         (, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         vm.startPrank(USER);
         uint256 dscToMint = USER_MAX_DSC_MINT + 1 ether;
-        (uint256 expectedHealthFactor) = calculateHealthFactor(collateralValueInUsd, dscToMint);
+        (uint256 expectedHealthFactor) = engine.calculateHealthFactor(dscToMint, collateralValueInUsd);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
         engine.mintDSC(dscToMint);
         vm.stopPrank();
@@ -205,7 +205,7 @@ contract DSCEngineTest is Test {
             - But here we are trying to redeem 5,250 USD worth of collateral, 
         */
         uint256 collateralAfterRedeem = collateralValueInUsd - engine.getUsdValue(weth, 2.1 ether);
-        uint256 expectedHealthFactor = calculateHealthFactor(collateralAfterRedeem, totalDscMinted);
+        uint256 expectedHealthFactor = engine.calculateHealthFactor(totalDscMinted, collateralAfterRedeem);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, expectedHealthFactor));
         engine.redeemCollateral(weth, 2.1 ether);
         vm.stopPrank();
@@ -215,12 +215,12 @@ contract DSCEngineTest is Test {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfo(USER);
         uint256 collateralToRedeem = 2 ether;
         uint256 expectedCollateralValue = collateralValueInUsd - engine.getUsdValue(weth, collateralToRedeem);
-        uint256 expectedHealthFactor = calculateHealthFactor(expectedCollateralValue, totalDscMinted);
+        uint256 expectedHealthFactor = engine.calculateHealthFactor(totalDscMinted, expectedCollateralValue);
         vm.startPrank(USER);
         engine.redeemCollateral(weth, collateralToRedeem);
         vm.stopPrank();
         (uint256 actualTotalDscMinted, uint256 actualCollateralValueInUsd) = engine.getAccountInfo(USER);
-        uint256 actualHealthFactor = calculateHealthFactor(actualCollateralValueInUsd, actualTotalDscMinted);
+        uint256 actualHealthFactor = engine.calculateHealthFactor(actualTotalDscMinted, actualCollateralValueInUsd);
         assertEq(actualCollateralValueInUsd, expectedCollateralValue, "Collateral value in USD should be 23000");
         assertEq(actualTotalDscMinted, totalDscMinted, "Total DSC minted should be 12500");
         assertEq(expectedHealthFactor, actualHealthFactor, "Health factor should be 200%");
@@ -268,9 +268,8 @@ contract DSCEngineTest is Test {
         vm.startPrank(USER);
         uint256 collateralToRedeem = 5 ether;
         uint256 dscToBurn = 1000 ether;
-        uint256 userHealthFactor = calculateHealthFactor(
-            engine.getUsdValue(weth, USER_STARTING_ERC20_BALANCE - collateralToRedeem),
-            USER_INITIAL_DSC_MINT - dscToBurn
+        uint256 userHealthFactor = engine.calculateHealthFactor(
+            USER_INITIAL_DSC_MINT - dscToBurn, engine.getUsdValue(weth, USER_STARTING_ERC20_BALANCE - collateralToRedeem)
         );
         dsc.approve(address(engine), dscToBurn);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorTooLow.selector, userHealthFactor));
@@ -333,18 +332,5 @@ contract DSCEngineTest is Test {
 
     function testCanLiquidate() public liquidated {
         console.log("Liquidated Successfully");
-    }
-
-    /*  
-        ##################################
-        ######## Helper Functions ########
-        ##################################
-    */
-    function calculateHealthFactor(uint256 _collateralValueInUsd, uint256 _dscMinted) public pure returns (uint256) {
-        if (_dscMinted == 0) {
-            return type(uint256).max;
-        }
-        uint256 collateralThreshold = (_collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        return (collateralThreshold * PRECISION) / _dscMinted;
     }
 }
