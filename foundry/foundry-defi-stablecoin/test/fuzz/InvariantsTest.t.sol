@@ -24,12 +24,14 @@ import {DSCEngine} from "../../src/DSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Handler} from "./Handler.t.sol";
 
 contract InvariantsTest is StdInvariant, Test {
     DeployDSC deployer;
     DSCEngine engine;
     DecentralizedStableCoin dsc;
     HelperConfig config;
+    Handler handler;
     address weth;
     address wbtc;
 
@@ -37,7 +39,9 @@ contract InvariantsTest is StdInvariant, Test {
         deployer = new DeployDSC();
         (dsc, engine, config) = deployer.run();
         (,, weth, wbtc,) = config.activeNetworkConfig();
-        targetContract(address(engine));
+        handler = new Handler(engine, dsc);
+        // targetContract(address(engine));
+        targetContract(address(handler));
     }
 
     // adding our invariant

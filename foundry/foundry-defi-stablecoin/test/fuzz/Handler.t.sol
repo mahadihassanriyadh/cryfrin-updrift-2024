@@ -14,3 +14,28 @@
 */
 
 pragma solidity ^0.8.24;
+
+import {Test} from "forge-std/Test.sol";
+import {DSCEngine} from "../../src/DSCEngine.sol";
+import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
+
+contract Handler is Test {
+    DSCEngine engine;
+    DecentralizedStableCoin dsc;
+
+    constructor(DSCEngine _engine, DecentralizedStableCoin _dsc) {
+        engine = _engine;
+        dsc = _dsc;
+    }
+
+    // don't call redeemCollateral if there is no collateral
+    function depositCollateral(address _collateralSeed, uint256 _amountCollateral) public {
+        engine.depositCollateral(_collateralSeed, _amountCollateral);
+    }
+
+    /*  
+        ##################################
+        ######## Helper Functions ########
+        ##################################
+    */
+}
