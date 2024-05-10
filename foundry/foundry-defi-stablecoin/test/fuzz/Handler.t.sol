@@ -41,12 +41,24 @@ contract Handler is Test {
     // don't call redeemCollateral if there is no collateral
     function depositCollateral(uint256 _collateralSeed, uint256 _amountCollateral) public {
         ERC20Mock collateral = _getCollateralFromSeed(_collateralSeed);
+        // this bound function is a part of the forge-std library in StdUtils.sol
+        // this function is used to bound the value of _amountCollateral between 1 and MAX_DEPOSIT_SIZE
+        // so while running the fuzzer, the value of _amountCollateral will always be between 1 and MAX_DEPOSIT_SIZE
         _amountCollateral = bound(_amountCollateral, 1, MAX_DEPOSIT_SIZE);
 
         vm.startPrank(msg.sender);
         collateral.mint(msg.sender, _amountCollateral);
         collateral.approve(address(engine), _amountCollateral);
         engine.depositCollateral(address(collateral), _amountCollateral);
+        vm.stopPrank();
+    }
+
+    function redeemCollateral(uint256 _collateralSeed, uint256 _amountCollateral) public {
+        ERC20Mock collateral = _getCollateralFromSeed(_collateralSeed);
+        _amountCollateral = bound(_amountCollateral, 1, MAX_DEPOSIT_SIZE);
+
+        vm.startPrank(msg.sender);
+        engine.redeemCollateral(address(collateral), _amountCollateral);
         vm.stopPrank();
     }
 
