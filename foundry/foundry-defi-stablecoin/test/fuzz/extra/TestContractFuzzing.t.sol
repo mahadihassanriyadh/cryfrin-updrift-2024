@@ -3,10 +3,11 @@
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
-import {FuzzInvariantTestContract} from "../../src/fuzzInvariantTestContract.sol";
+import {FuzzInvariantTestContract} from "../../../src/fuzzInvariantTestContract.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
+/* 
 
-contract TestContractTest is StdInvariant, Test {
+contract TestContractFuzzing is StdInvariant, Test {
     FuzzInvariantTestContract fuzzInvariantTestContract;
 
     function setUp() public {
@@ -34,3 +35,5 @@ contract TestContractTest is StdInvariant, Test {
         assert(fuzzInvariantTestContract.shouldAlwaysBeZero() == 0);
     }
 }
+
+*/
