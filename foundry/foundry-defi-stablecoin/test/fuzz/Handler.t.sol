@@ -15,7 +15,7 @@
 
 pragma solidity ^0.8.24;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
@@ -58,8 +58,11 @@ contract Handler is Test {
         uint256 maxCollateralToRedeem = engine.getCollateralBalanceOfUser(msg.sender, address(collateral));
         _amountCollateral = bound(_amountCollateral, 0, maxCollateralToRedeem);
         if (_amountCollateral == 0) {
+            // console.log("redeemCollateral: _amountCollateral is 0");
             return;
         }
+
+        // vm.assume not working as expected ❌
         // vm.assume(_amountCollateral != 0);
 
         vm.startPrank(msg.sender);
