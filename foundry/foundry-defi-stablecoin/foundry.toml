@@ -15,6 +15,8 @@ runs = 1000
 runs = 128
 depth = 128
 
+# fail_on_revert = true, means test won't pass if it reverts.
+# fail_on_revert = false, means test will pass even if it reverts. This is the default setting.
 fail_on_revert = true
 
 # ffi = true # ❗️Caution: enabling this would allow foundry to run commands directly on your machine. So we should try to keep this disabled as much as possible. But it is important for us to know what it is, how to use it and when we need it. Especially for something like this, to get our most recent deployments.

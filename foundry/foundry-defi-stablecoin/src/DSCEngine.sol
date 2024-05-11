@@ -612,4 +612,9 @@ contract DSCEngine is ReentrancyGuard {
     function getDsc() external view returns (address) {
         return address(i_dsc);
     }
+
+    function getMaxMintableDscByUser(address _user) external view returns (int256) {
+        uint256 totalCollateralValueInUsd = getAccountCollateralValueInUsd(_user);
+        return int256(totalCollateralValueInUsd / 2) - int256(s_DSCMinted[_user]);
+    }
 }

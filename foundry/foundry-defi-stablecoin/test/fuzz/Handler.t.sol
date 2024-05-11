@@ -58,7 +58,6 @@ contract Handler is Test {
         uint256 maxCollateralToRedeem = engine.getCollateralBalanceOfUser(msg.sender, address(collateral));
         _amountCollateral = bound(_amountCollateral, 0, maxCollateralToRedeem);
         if (_amountCollateral == 0) {
-            // console.log("redeemCollateral: _amountCollateral is 0");
             return;
         }
 
@@ -67,6 +66,22 @@ contract Handler is Test {
 
         vm.startPrank(msg.sender);
         engine.redeemCollateral(address(collateral), _amountCollateral);
+        vm.stopPrank();
+    }
+
+    function mintDSC(uint256 _amount) public {
+        int256 maxMintableDscByUser = engine.getMaxMintableDscByUser(msg.sender);
+        if (maxMintableDscByUser <= 0) {
+            return;
+        }
+
+        _amount = bound(_amount, 0, uint256(maxMintableDscByUser));
+        if (_amount == 0) {
+            return;
+        }
+        
+        vm.startPrank(msg.sender);
+        engine.mintDSC(_amount);
         vm.stopPrank();
     }
 
