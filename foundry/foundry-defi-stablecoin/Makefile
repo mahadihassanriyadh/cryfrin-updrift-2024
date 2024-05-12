@@ -64,3 +64,7 @@ add:
 	git add -A
 	git commit -s -m "$(m)"
 	git push
+
+# to print all the functios of that contract including the selectors of those functions
+get-methods:
+	@forge inspect DSCEngine methods

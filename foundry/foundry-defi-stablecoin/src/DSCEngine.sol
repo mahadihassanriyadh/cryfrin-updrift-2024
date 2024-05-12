@@ -577,6 +577,30 @@ contract DSCEngine is ReentrancyGuard {
         return s_collateralDeposited[_user][_token];
     }
 
+    function getMaxMintableDscByUser(address _user) external view returns (int256) {
+        uint256 totalCollateralValueInUsd = getAccountCollateralValueInUsd(_user);
+        return int256(totalCollateralValueInUsd / 2) - int256(s_DSCMinted[_user]);
+    }
+
+    function getDsc() external view returns (address) {
+        return address(i_dsc);
+    }
+
+    function getMaxCollateralToRedeem(address _user, address _token) external view returns (uint256) {
+        uint256 redeemCollateralAmount = s_collateralDeposited[_user][_token];
+        uint256 redeemCollateralValueInUsd = getUsdValue(_token, redeemCollateralAmount);
+        uint256 totalCollateralValueInUsd = getAccountCollateralValueInUsd(_user);
+        uint256 totalDscMinted = s_DSCMinted[_user];
+        int256 maxRedeemableCollateralValueInUsd = int256(totalCollateralValueInUsd) - (int256(totalDscMinted) * 2);
+        if (maxRedeemableCollateralValueInUsd <= 0) {
+            return 0;
+        } else if (maxRedeemableCollateralValueInUsd >= int256(redeemCollateralValueInUsd)) {
+            return redeemCollateralAmount;
+        } else {
+            return getTokenAmountFromUsd(_token, uint256(maxRedeemableCollateralValueInUsd));
+        }
+    }
+    
     function getPrecision() external pure returns (uint256) {
         return PRECISION;
     }
@@ -607,29 +631,5 @@ contract DSCEngine is ReentrancyGuard {
 
     function getCollateralTokenPriceFeed(address _token) external view returns (address) {
         return s_priceFeeds[_token];
-    }
-
-    function getDsc() external view returns (address) {
-        return address(i_dsc);
-    }
-
-    function getMaxMintableDscByUser(address _user) external view returns (int256) {
-        uint256 totalCollateralValueInUsd = getAccountCollateralValueInUsd(_user);
-        return int256(totalCollateralValueInUsd / 2) - int256(s_DSCMinted[_user]);
-    }
-
-    function getMaxCollateralToRedeem(address _user, address _token) external view returns (uint256) {
-        uint256 redeemCollateralAmount = s_collateralDeposited[_user][_token];
-        uint256 redeemCollateralValueInUsd = getUsdValue(_token, redeemCollateralAmount);
-        uint256 totalCollateralValueInUsd = getAccountCollateralValueInUsd(_user);
-        uint256 totalDscMinted = s_DSCMinted[_user];
-        int256 maxRedeemableCollateralValueInUsd = int256(totalCollateralValueInUsd) - (int256(totalDscMinted) * 2);
-        if (maxRedeemableCollateralValueInUsd <= 0) {
-            return 0;
-        } else if (maxRedeemableCollateralValueInUsd >= int256(redeemCollateralValueInUsd)) {
-            return redeemCollateralAmount;
-        } else {
-            return getTokenAmountFromUsd(_token, uint256(maxRedeemableCollateralValueInUsd));
-        }
     }
 }

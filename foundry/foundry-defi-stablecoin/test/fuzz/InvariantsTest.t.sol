@@ -65,4 +65,15 @@ contract InvariantsTest is StdInvariant, Test {
 
         assert((totalCollateralValue / 2) >= totalSupply);
     }
+
+    function invariant_gettersShouldNotRevert() public view {
+        engine.getPrecision();
+        engine.getAdditionalFeedPrecision();
+        engine.getMinHealthFactor();
+        engine.getLiquidationThreshold();
+        engine.getLiquidationPrecision();
+        engine.getLiquidationBonus();
+        engine.getCollateralTokens();
+        engine.getDsc();
+    }
 }
