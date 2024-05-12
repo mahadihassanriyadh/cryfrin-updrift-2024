@@ -57,9 +57,12 @@ contract InvariantsTest is StdInvariant, Test {
 
         uint256 totalCollateralValue = wethValueInUsd + wbtcValueInUsd;
 
-        console.log("Total Supply: ", totalSupply);
-        console.log("Total Collateral Value: ", totalCollateralValue);
+        console.log("Total Supply: %s", totalSupply);
+        console.log("Total Collateral Value: %s", totalCollateralValue);
+        console.log("Deposit Collateral Called: %s", handler.timesDepositCollateralIsCalled());
+        console.log("Redeem Collateral Called: %s", handler.timesRedeemCollateralIsCalled());
+        console.log("Mint Dsc Called: %s", handler.timesMintIsCalled());
 
-        assert(totalCollateralValue >= totalSupply);
+        assert((totalCollateralValue / 2) >= totalSupply);
     }
 }

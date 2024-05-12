@@ -27,6 +27,11 @@ contract Handler is Test {
     ERC20Mock weth;
     ERC20Mock wbtc;
 
+    address[] public usersWithCollateralDeposited;
+    uint256 public timesDepositCollateralIsCalled = 0;
+    uint256 public timesRedeemCollateralIsCalled = 0;
+    uint256 public timesMintIsCalled = 0;
+
     uint256 constant MAX_DEPOSIT_SIZE = type(uint96).max; // max value for uint96
 
     constructor(DSCEngine _engine, DecentralizedStableCoin _dsc) {
@@ -51,11 +56,24 @@ contract Handler is Test {
         collateral.approve(address(engine), _amountCollateral);
         engine.depositCollateral(address(collateral), _amountCollateral);
         vm.stopPrank();
+        
+        // if(engine.getMaxMintableDscByUser(msg.sender) == 0) {
+        //     usersWithCollateralDeposited.push(msg.sender);
+        // }
+        usersWithCollateralDeposited.push(msg.sender);
+
+        timesDepositCollateralIsCalled++;
     }
 
-    function redeemCollateral(uint256 _collateralSeed, uint256 _amountCollateral) public {
+    function redeemCollateral(uint256 _collateralSeed, uint256 _amountCollateral, uint256 _addressSeed) public {
+        if(usersWithCollateralDeposited.length == 0) {
+            return;
+        }
+
+        address sender = usersWithCollateralDeposited[_addressSeed % usersWithCollateralDeposited.length];
+
         ERC20Mock collateral = _getCollateralFromSeed(_collateralSeed);
-        uint256 maxCollateralToRedeem = engine.getCollateralBalanceOfUser(msg.sender, address(collateral));
+        uint256 maxCollateralToRedeem = engine.getMaxCollateralToRedeem(sender, address(collateral));
         _amountCollateral = bound(_amountCollateral, 0, maxCollateralToRedeem);
         if (_amountCollateral == 0) {
             return;
@@ -64,13 +82,21 @@ contract Handler is Test {
         // vm.assume not working as expected ❌
         // vm.assume(_amountCollateral != 0);
 
-        vm.startPrank(msg.sender);
+        vm.startPrank(sender);
         engine.redeemCollateral(address(collateral), _amountCollateral);
         vm.stopPrank();
+        timesRedeemCollateralIsCalled++;
+
     }
 
-    function mintDSC(uint256 _amount) public {
-        int256 maxMintableDscByUser = engine.getMaxMintableDscByUser(msg.sender);
+    function mintDSC(uint256 _amount, uint256 _addressSeed) public {
+        if(usersWithCollateralDeposited.length == 0) {
+            return;
+        }
+
+        address sender = usersWithCollateralDeposited[_addressSeed % usersWithCollateralDeposited.length];
+
+        int256 maxMintableDscByUser = engine.getMaxMintableDscByUser(sender);
         if (maxMintableDscByUser <= 0) {
             return;
         }
@@ -79,10 +105,12 @@ contract Handler is Test {
         if (_amount == 0) {
             return;
         }
-        
-        vm.startPrank(msg.sender);
+
+        vm.startPrank(sender);
         engine.mintDSC(_amount);
         vm.stopPrank();
+
+        timesMintIsCalled++;
     }
 
     /*  
