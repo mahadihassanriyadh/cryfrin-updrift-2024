@@ -35,6 +35,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {OracleLib} from "./libraries/OracleLib.sol";
 
 /**
  * @title DSCEngine
@@ -70,6 +71,13 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__HealthFactorNotImproved(uint256 healthFactor);
     error DSCEngine__NotEnoughDscMinted(uint256 totalDscMinted);
     error DSCEngine__NotEnoughCollateralDeposited();
+
+    /*  
+        ####################################
+        ############# 🟢 Types #############
+        ####################################
+    */
+    using OracleLib for AggregatorV3Interface;
 
     /*  
         ####################################
@@ -477,7 +485,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function _getUsdValue(address _token, uint256 _amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // price is in 8 decimal places
         // so if 1 ETH = $1000, we would get 1000 * 10e8 here
         // now if we wanted to calculate the value, we couldn't simply do:
@@ -526,7 +534,7 @@ contract DSCEngine is ReentrancyGuard {
      */
     function getTokenAmountFromUsd(address _collateralToken, uint256 _usdAmmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[_collateralToken]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
 
         // ($500e18 * 1e18) / (($2000e8 * 1e10)
         return (_usdAmmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
@@ -600,7 +608,7 @@ contract DSCEngine is ReentrancyGuard {
             return getTokenAmountFromUsd(_token, uint256(maxRedeemableCollateralValueInUsd));
         }
     }
-    
+
     function getPrecision() external pure returns (uint256) {
         return PRECISION;
     }
