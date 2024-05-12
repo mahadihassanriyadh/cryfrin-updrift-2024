@@ -19,6 +19,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 
 contract Handler is Test {
     DSCEngine engine;
@@ -26,6 +27,9 @@ contract Handler is Test {
 
     ERC20Mock weth;
     ERC20Mock wbtc;
+
+    MockV3Aggregator ethUsdPriceFeed;
+    MockV3Aggregator btcUsdPriceFeed;
 
     address[] public usersWithCollateralDeposited;
     uint256 public timesDepositCollateralIsCalled = 0;
@@ -41,6 +45,9 @@ contract Handler is Test {
         address[] memory collateralTokens = engine.getCollateralTokens();
         weth = ERC20Mock(collateralTokens[0]);
         wbtc = ERC20Mock(collateralTokens[1]);
+
+        ethUsdPriceFeed = MockV3Aggregator(engine.getCollateralTokenPriceFeed(address(weth)));
+        btcUsdPriceFeed = MockV3Aggregator(engine.getCollateralTokenPriceFeed(address(wbtc)));
     }
 
     // don't call redeemCollateral if there is no collateral
@@ -113,6 +120,20 @@ contract Handler is Test {
         timesMintIsCalled++;
     }
 
+    /*  
+        // ❌ This code below breaks our invariant tests, however this lets us know our current system is prone to high flactuations in the price feed.abi
+        // If the collateral price crashes, our current system will most likely break.
+
+        function updateCollateralPrice(uint96 newPrice) public {
+            int256 newPriceInt = int256(uint256(newPrice));
+            if (newPrice%2 == 0) {
+                ethUsdPriceFeed.updateAnswer(newPriceInt);
+            } else {
+                btcUsdPriceFeed.updateAnswer(newPriceInt);
+            }
+        }
+    */
+   
     /*  
         ##################################
         ######## Helper Functions ########
