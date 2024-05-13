@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/proxy/Proxy.sol";
+import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 
 contract SmallProxy is Proxy {
     // This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
