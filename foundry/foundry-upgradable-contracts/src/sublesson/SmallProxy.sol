@@ -11,7 +11,7 @@ import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
  * And both of them call the _fallback() function.
  * Then the _fallback() function calls the _delegate() function, which is the one that actually calls the implementation.
  * 
- * So, whenever we call a function on the proxy, it will call the implementation function
+ * @notice So, whenever we call a function on the proxy, if it is not setImplementation() function it will call the implementation contract that is on the _IMPLEMENTATION_SLOT.
  * 
  * @notice We tend to avoid storing any info in the proxy contract, as changes to the storage layout of the implementation contract can result in unexpected behavior in proxy.
  * @notice To tackle this was there was a proposal for a new proxy standard called UUPS (Universal Upgradeable Proxy Standard).
@@ -20,6 +20,11 @@ import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
  * 
  * @notice This logic/implementation contract address is stored in a specific storage slot, which can be obtaned by:
  * bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1))
+ * 
+ * @notice This contract also uses a lot of assembly code, or more specifically Yul (inline assembly).
+ * Yul is an aintermediate language that can be compiled to bytecode for different backends.
+ * It's a sort of inline assembly and allows to write really, really low level codes, close to opcodes.
+ * 
  */
 
 contract SmallProxy is Proxy {
