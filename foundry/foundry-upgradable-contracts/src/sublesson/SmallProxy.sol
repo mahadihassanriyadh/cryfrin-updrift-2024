@@ -4,6 +4,24 @@ pragma solidity ^0.8.19;
 
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 
+/**
+ * @title SmallProxy
+ * 
+ * @notice If we look into the contract Proxy.sol from OpenZeppelin, we will see there is a fallback() and a receive() function.
+ * And both of them call the _fallback() function.
+ * Then the _fallback() function calls the _delegate() function, which is the one that actually calls the implementation.
+ * 
+ * So, whenever we call a function on the proxy, it will call the implementation function
+ * 
+ * @notice We tend to avoid storing any info in the proxy contract, as changes to the storage layout of the implementation contract can result in unexpected behavior in proxy.
+ * @notice To tackle this was there was a proposal for a new proxy standard called UUPS (Universal Upgradeable Proxy Standard).
+ * @notice Which is ERC-1967
+ * This is a simple implementation for proxies, which provides a consistent location where proxies store the address of the logic contract they delegate to, as well as other proxy-specific information.
+ * 
+ * @notice This logic/implementation contract address is stored in a specific storage slot, which can be obtaned by:
+ * bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1))
+ */
+
 contract SmallProxy is Proxy {
     // This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
     bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
