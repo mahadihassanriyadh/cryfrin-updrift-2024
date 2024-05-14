@@ -38,12 +38,15 @@ contract BoxV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @notice ⭐️⭐️⭐️ initialize ⭐️⭐️⭐️
+     * This is basically a constructor for proxy contracts.
      * This is our implementation contract. If we use constructor here, it will be executed in the context of the implementation contract, not the proxy contract.
      * So we use an initializer function instead of a constructor. Which will be called on the proxy contract.
-     * 
+     *
      * This __Ownable_init() is from the OwnableUpgradeable contract, which is used to set the owner of the contract.
      * This __UUPSUpgradeable_init() is from the UUPSUpgradeable contract, which is used to initialize the UUPSUpgradeable contract.
-    */
+     *
+     * @notice the initializer moifier is used to make sure that this function is called only once. Meaning, it won't be possible to call the initialize function again after it has been called once.
+     */
     function initialize() public initializer {
         __Ownable_init(msg.sender); // this is essentially saying: owner = msg.sender; The diff is, instead of storing the owner in the implementation contract, it stores it in the proxy contract. Also the double underscore (__) is a convention to indicate that this is an initializer function.
         __UUPSUpgradeable_init(); // this basically does nothing, but it's best practice to have this in here, to say, Hey, this is a UUPS Upgradeable contract. We're gonna treat as such.
