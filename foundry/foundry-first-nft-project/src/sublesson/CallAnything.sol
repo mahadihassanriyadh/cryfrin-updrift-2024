@@ -22,6 +22,7 @@ contract CallAnythig {
         We can get a function selector as easy as this:
             - "transfer(address,uint256)" is our function signature
             - and our resulting function selector of "transfer(address,uint256)" is output from this function
+                bytes4(keccak256("transfer(address,uint256)"))
         
         NOTE: one thing to note here is that there shouldn't be any spaces in "transfer(address,uint256)" 
     */
