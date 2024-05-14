@@ -30,6 +30,7 @@ contract Encoding {
     // will work similarly as encodeStringPacked() but there are differences
     // This is just type casting from string bytes
     // It's slightly different from the above way, and they have different gas costs
+    // Type casting is more gas efficient
     function encodeStringBytes() public pure returns (bytes memory) {
         bytes memory someString = bytes("some string");
         return someString;
