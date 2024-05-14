@@ -19,6 +19,7 @@ contract Encoding {
 
     // https://forum.openzeppelin.com/t/difference-between-abi-encodepacked-string-and-bytes-string/11837
     // encodePacked
+    // encodePacked is copying the memory, the bytes() is just casting the pointer type.
     // This is great if you want to save space, not good for calling functions.
     // You can sort of think of it as a compressor for the massive bytes object above.
     function encodeStringPacked() public pure returns (bytes memory) {
@@ -27,7 +28,7 @@ contract Encoding {
     }
 
     // will work similarly as encodeStringPacked() but there are differences
-    // This is just type casting from bytes to string
+    // This is just type casting from string bytes
     // It's slightly different from the above way, and they have different gas costs
     function encodeStringBytes() public pure returns (bytes memory) {
         bytes memory someString = bytes("some string");
@@ -45,31 +46,18 @@ contract Encoding {
     }
 
     function multiDecode() public pure returns (string memory, string memory) {
-        (string memory someString, string memory someOtherString) = abi.decode(
-            multiEncode(),
-            (string, string)
-        );
+        (string memory someString, string memory someOtherString) = abi.decode(multiEncode(), (string, string));
         return (someString, someOtherString);
     }
 
     function multiEncodePacked() public pure returns (bytes memory) {
-        bytes memory someString = abi.encodePacked(
-            "some string, ",
-            "it's bigger"
-        );
+        bytes memory someString = abi.encodePacked("some string, ", "it's bigger");
         return someString;
     }
 
     // this won't work ❌
-    function multiDecodePacked()
-        public
-        pure
-        returns (string memory, string memory)
-    {
-        (string memory someString, string memory someOtherString) = abi.decode(
-            multiEncodePacked(),
-            (string, string)
-        );
+    function multiDecodePacked() public pure returns (string memory, string memory) {
+        (string memory someString, string memory someOtherString) = abi.decode(multiEncodePacked(), (string, string));
         return (someString, someOtherString);
     }
 
@@ -104,7 +92,7 @@ contract Encoding {
     // for you. Flashback to when we withdrew ETH from our raffle:
 
     function withdraw(address recentWinner) public {
-        (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        (bool success,) = recentWinner.call{value: address(this).balance}("");
         require(success, "Transfer Failed");
     }
 
