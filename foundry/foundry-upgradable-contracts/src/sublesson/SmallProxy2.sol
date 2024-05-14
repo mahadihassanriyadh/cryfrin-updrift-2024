@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
+import {Proxy} from "@openzeppelin/proxy/Proxy.sol";
 
 /**
  * @title SmallProxy2
