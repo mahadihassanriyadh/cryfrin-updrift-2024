@@ -7,7 +7,7 @@ import {BoxV1} from "../src/BoxV1.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract DeployBox is Script {
-    uint256 public constant DEFAUT_ANVIL_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+    // uint256 public constant DEFAUT_ANVIL_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
 
     function run() external returns (address) {
         address proxy = deployBox();
@@ -15,7 +15,7 @@ contract DeployBox is Script {
     }
 
     function deployBox() public returns (address) {
-        vm.startBroadcast(DEFAUT_ANVIL_KEY);
+        vm.startBroadcast();
         BoxV1 box = new BoxV1(); // implementation contract (Logic)
         ERC1967Proxy proxy = new ERC1967Proxy(address(box), abi.encodeWithSignature("initialize()")); // proxy contract
         vm.stopBroadcast();
