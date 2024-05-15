@@ -16,7 +16,6 @@ contract DeployAndUpgradeTest is Test {
     address public proxy;
 
     BoxV1 public boxV1;
-    BoxV2 public boxV2;
 
     function setUp() public {
         deployer = new DeployBox();
@@ -33,8 +32,18 @@ contract DeployAndUpgradeTest is Test {
     }
 
     function testUpgradeWorks() public {
-        boxV2 = new BoxV2();
+        BoxV2 boxV2 = new BoxV2();
 
-        upgrader.upgradeBox(proxy, address(boxV2));
+        console.log("BoxV2 Owner", boxV2.owner());
+        console.log("Proxy Owner", BoxV1(proxy).owner());
+        console.log("Msg Sender", msg.sender);
+        console.log("prev number", BoxV1(proxy).getNumber());
+
+        vm.prank(BoxV1(proxy).owner());
+        BoxV1(proxy).transferOwnership(msg.sender);
+
+        address proxy2 = upgrader.upgradeBox(proxy, address(boxV2));
+
+        console.log("current number", BoxV2(proxy2).getNumber());
     }
 }
