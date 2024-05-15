@@ -7,7 +7,7 @@ import {Initializable} from "@openzeppelin-contracts-upgradeable/contracts/proxy
 import {OwnableUpgradeable} from "@openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 contract BoxV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    uint256 internal number;
+    uint256 internal value;
 
     // @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -17,11 +17,15 @@ contract BoxV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function initialize() public initializer {
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
-        number = 999;
+        value = 999;
     }
 
-    function getNumber() external view returns (uint256) {
-        return number;
+    function setValue(uint256 _newValue) external {
+        value = _newValue;
+    }
+
+    function getValue() external view returns (uint256) {
+        return value;
     }
 
     function version() external pure returns (uint256) {
