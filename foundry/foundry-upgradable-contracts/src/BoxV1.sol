@@ -24,7 +24,7 @@ import {OwnableUpgradeable} from "@openzeppelin-contracts-upgradeable/contracts/
  *
  */
 contract BoxV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    uint256 internal number;
+    uint256 internal value;
 
     /**
      * @notice ⭐️⭐️⭐️ _disableInitializers ⭐️⭐️⭐️
@@ -50,11 +50,11 @@ contract BoxV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function initialize() public initializer {
         __Ownable_init(msg.sender); // this is essentially saying: owner = msg.sender; The diff is, instead of storing the owner in the implementation contract, it stores it in the proxy contract. Also the double underscore (__) is a convention to indicate that this is an initializer function.
         __UUPSUpgradeable_init(); // this basically does nothing, but it's best practice to have this in here, to say, Hey, this is a UUPS Upgradeable contract. We're gonna treat as such.
-        number = 99;
+        value = 999;
     }
 
-    function getNumber() external view returns (uint256) {
-        return number;
+    function getValue() external view returns (uint256) {
+        return value;
     }
 
     function version() external pure returns (uint256) {

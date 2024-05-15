@@ -26,24 +26,16 @@ contract DeployAndUpgradeTest is Test {
 
     function testDeploy() public {
         boxV1 = BoxV1(proxy);
-        console.log("owner: ", boxV1.owner());
         assertEq(boxV1.version(), 1, "BoxV1 should have version 1");
-        assertEq(boxV1.getNumber(), 99, "BoxV1 should have default number 99");
+        assertEq(boxV1.getValue(), 999, "BoxV1 should have default number 999");
     }
 
     function testUpgradeWorks() public {
         BoxV2 boxV2 = new BoxV2();
 
-        console.log("BoxV2 Owner", boxV2.owner());
-        console.log("Proxy Owner", BoxV1(proxy).owner());
-        console.log("Msg Sender", msg.sender);
-        console.log("prev number", BoxV1(proxy).getNumber());
-
         vm.prank(BoxV1(proxy).owner());
         BoxV1(proxy).transferOwnership(msg.sender);
 
         address proxy2 = upgrader.upgradeBox(proxy, address(boxV2));
-
-        console.log("current number", BoxV2(proxy2).getNumber());
     }
 }

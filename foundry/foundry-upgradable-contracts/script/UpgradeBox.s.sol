@@ -25,7 +25,6 @@ contract UpgradeBox is Script {
         vm.startBroadcast();
         BoxV1 proxy = BoxV1(_proxyAddress);
         proxy.upgradeToAndCall(address(_newBox), "");
-        // BoxV2(address(proxy)).initialize();
         vm.stopBroadcast();
 
         return address(proxy);
