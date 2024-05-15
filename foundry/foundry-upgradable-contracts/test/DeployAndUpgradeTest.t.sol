@@ -24,4 +24,11 @@ contract DeployAndUpgradeTest is Test {
 
         proxy = deployer.run(); // right now points to BoxV1
     }
+
+    function testDeploy() public {
+        boxV1 = BoxV1(proxy);
+        console.log("owner: ", boxV1.owner());
+        assertEq(boxV1.version(), 1, "BoxV1 should have version 1");
+        assertEq(boxV1.getNumber(), 99, "BoxV1 should have default number 99");
+    }
 }

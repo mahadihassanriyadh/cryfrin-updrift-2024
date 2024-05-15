@@ -50,6 +50,7 @@ contract BoxV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function initialize() public initializer {
         __Ownable_init(msg.sender); // this is essentially saying: owner = msg.sender; The diff is, instead of storing the owner in the implementation contract, it stores it in the proxy contract. Also the double underscore (__) is a convention to indicate that this is an initializer function.
         __UUPSUpgradeable_init(); // this basically does nothing, but it's best practice to have this in here, to say, Hey, this is a UUPS Upgradeable contract. We're gonna treat as such.
+        number = 99;
     }
 
     function getNumber() external view returns (uint256) {

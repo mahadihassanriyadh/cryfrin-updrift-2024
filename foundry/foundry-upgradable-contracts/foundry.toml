@@ -9,4 +9,7 @@ remappings = [
     "@foundry-devops/=lib/foundry-devops",
 ]
 
+# instead of ffi = true, we can use the following settings
+fs_permissions = [{ access = "read", path = "./broadcast" }]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
