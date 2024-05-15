@@ -31,4 +31,10 @@ contract DeployAndUpgradeTest is Test {
         assertEq(boxV1.version(), 1, "BoxV1 should have version 1");
         assertEq(boxV1.getNumber(), 99, "BoxV1 should have default number 99");
     }
+
+    function testUpgradeWorks() public {
+        boxV2 = new BoxV2();
+
+        upgrader.upgradeBox(proxy, address(boxV2));
+    }
 }
