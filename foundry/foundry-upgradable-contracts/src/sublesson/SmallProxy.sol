@@ -67,6 +67,11 @@ contract SmallProxy is Proxy {
             valueAtStorageSlotZero := sload(0)
         }
     }
+    
+    // using this function just to avoid solidity warning
+    receive() external payable virtual {
+        _fallback();
+    }
 }
 
 contract ImplementationA {

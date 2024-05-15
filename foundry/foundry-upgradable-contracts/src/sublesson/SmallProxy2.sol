@@ -6,11 +6,10 @@ import {Proxy} from "@openzeppelin/proxy/Proxy.sol";
 
 /**
  * @title SmallProxy2
- * 
+ *
  * @notice Here I personally tried to change some codes and tried to understand how the proxy works.
- * 
+ *
  */
-
 contract SmallProxy2 is Proxy {
     // This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
     bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
@@ -36,6 +35,11 @@ contract SmallProxy2 is Proxy {
         assembly {
             valueAtStorageSlotZero := sload(0)
         }
+    }
+
+    // using this function just to avoid solidity warning
+    receive() external payable virtual {
+        _fallback();
     }
 }
 
