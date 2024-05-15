@@ -44,7 +44,10 @@ else ifeq ($(findstring --network ganache,$(ARGS)),--network ganache)
 endif
 
 deploy:
-	@forge script script/DeployBasicNFT.s.sol:DeployBasicNFT $(NETWORK_ARGS)
+	@forge script script/DeployBox.s.sol:DeployBox $(NETWORK_ARGS)
+# for sepolia `make deploy ARGS="--network sepolia"`
+upgrade:
+	@forge script script/UpgradeBox.s.sol:UpgradeBox $(NETWORK_ARGS)
 
 mint:
 	@forge script script/Interactions.s.sol:MintBasicNFT ${NETWORK_ARGS}
