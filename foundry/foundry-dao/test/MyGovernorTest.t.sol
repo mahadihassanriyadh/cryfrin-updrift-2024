@@ -18,8 +18,8 @@ contract MyGovernorTest is Test {
     uint256 public constant INITIAL_SUPPLY = 100 ether;
 
     uint256 public constant MIN_DELAY = 3600; // 1 hour; delay after a vote passes and before it is executed
-    uint256 public constant VOTING_DELAY = 1; // How many blocks till a vote is active
-    uint256 public constant VOTING_PERIOD = 50400; // 1 week; considering 1 block per 12 seconds
+    uint256 public constant VOTING_DELAY = 7200; // 1 day; delay before a vote starts (How many blocks till the vote starts after proposal is created)
+    uint256 public constant VOTING_PERIOD = 50400; // 1 week; considering 1 block per 12 seconds (How many blocks till the vote is closed)
 
     address[] proposers; // means anyone can propose a vote
     address[] executors; // means anyone can execute a vote
