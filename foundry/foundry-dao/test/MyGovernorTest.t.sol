@@ -41,5 +41,21 @@ contract MyGovernorTest is Test {
         timeLock = new TimeLock(MIN_DELAY, proposers, executors);
 
         governor = new MyGovernor(govToken, timeLock);
+
+        /**
+         * @notice Now we have to grant some roles to the governor contract
+         * The timeLock actually starts with some default roles
+         * And we need to grant the governor some roles
+         * ⭐️⭐️⭐️ Also we need to remove ourselves as the admin of the timeLock
+         */
+        bytes32 proposerRole = timeLock.PROPOSER_ROLE();
+        bytes32 executorRole = timeLock.EXECUTOR_ROLE();
+        bytes32 adminRole = timeLock.DEFAULT_ADMIN_ROLE();
+
+        timeLock.grantRole(proposerRole, address(governor)); // only the governor can propose stuff to the timeLock
+        timeLock.grantRole(executorRole, address(0)); // anyone can execute a proposal
+        timeLock.renounceRole(adminRole, USER); // remove ourselves as the admin of the timeLock
+
+        vm.stopPrank();
     }
 }
