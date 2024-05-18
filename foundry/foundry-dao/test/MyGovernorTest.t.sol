@@ -17,10 +17,16 @@ contract MyGovernorTest is Test {
     address public USER = makeAddr("user");
     uint256 public constant INITIAL_SUPPLY = 100 ether;
 
-    uint256 public constant MIN_DELAY = 3600 seconds; // 1 hour; delay after a vote passes and before it is executed
+    uint256 public constant MIN_DELAY = 3600; // 1 hour; delay after a vote passes and before it is executed
+    uint256 public constant VOTING_DELAY = 1; // How many blocks till a vote is active
+    uint256 public constant VOTING_PERIOD = 50400; // 1 week; considering 1 block per 12 seconds
 
     address[] proposers; // means anyone can propose a vote
     address[] executors; // means anyone can execute a vote
+
+    address[] targets;
+    uint256[] values;
+    bytes[] calldatas;
 
     function setUp() public {
         govToken = new GovToken();
@@ -64,5 +70,71 @@ contract MyGovernorTest is Test {
     function testCantUpdateBoxWithoutVote() public {
         vm.expectRevert();
         box.store(1);
+    }
+
+    function testGovernanceUpdatesBox() public {
+        uint256 valueToStore = 566;
+        targets.push(address(box));
+        values.push(0);
+        bytes memory encodedFunctionCall = abi.encodeWithSignature("store(uint256)", valueToStore);
+        calldatas.push(encodedFunctionCall);
+        string memory description = "Update Box Value with the value 566";
+
+        // 1. Propose to the DAO
+        uint256 proposalId = governor.propose(targets, values, calldatas, description);
+
+        // View the state of the proposal
+        /*  
+            // We get this:
+            enum ProposalState {
+                Pending, // 0
+                Active, // 1
+                Canceled, // 2
+                Defeated, // 3
+                Succeeded, // 4
+                Queued, // 5
+                Expired, // 6
+                Executed // 7
+            }
+        */
+        console.log("Proposal State: ", uint256(governor.state(proposalId)));
+        assertEq(uint256(governor.state(proposalId)), 0);
+
+        // speed up the time to start the VOTING PERIOD
+        vm.warp(block.timestamp + VOTING_DELAY + 1);
+        vm.roll(block.number + VOTING_DELAY + 1);
+
+        console.log("Proposal State: ", uint256(governor.state(proposalId)));
+        assertEq(uint256(governor.state(proposalId)), 1);
+
+        // 2. Vote on the proposal
+        /*  
+            enum VoteType {
+                Against, // 0
+                For, // 1
+                Abstain // 2
+            }
+        */
+        string memory reason = "I want to update the box value";
+        uint8 voteWay = 1; // For (Voting yes)
+
+        vm.prank(USER);
+        governor.castVoteWithReason(proposalId, voteWay, reason);
+
+        vm.warp(block.timestamp + VOTING_PERIOD + 1);
+        vm.roll(block.number + VOTING_PERIOD + 1);
+
+        // 3. Queue the proposal or transaction
+        bytes32 descriptionHash = keccak256(abi.encodePacked(description));
+        governor.queue(targets, values, calldatas, descriptionHash);
+
+        vm.warp(block.timestamp + MIN_DELAY + 1);
+        vm.roll(block.number + MIN_DELAY + 1);
+        
+        // 4. Execute the proposal
+        governor.execute(targets, values, calldatas, descriptionHash);
+
+        assertEq(box.getValue(), valueToStore);
+        console.log("Box Value: ", box.getValue());
     }
 }
