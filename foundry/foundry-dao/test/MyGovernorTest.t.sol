@@ -56,6 +56,13 @@ contract MyGovernorTest is Test {
         timeLock.grantRole(executorRole, address(0)); // anyone can execute a proposal
         timeLock.renounceRole(adminRole, USER); // remove ourselves as the admin of the timeLock
 
+        box = new Box(USER);
+        box.transferOwnership(address(timeLock));
         vm.stopPrank();
+    }
+
+    function testCantUpdateBoxWithoutVote() public {
+        vm.expectRevert();
+        box.store(1);
     }
 }
