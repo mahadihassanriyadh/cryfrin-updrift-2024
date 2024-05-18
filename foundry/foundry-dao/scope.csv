@@ -1,0 +1,6 @@
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 2.00  T=0.01 s (396.7 files/s 17056.5 lines/s)"
+Solidity,./src/MyGovernor.sol,13,3,85
+Solidity,./src/GovToken.sol,6,3,16
+Solidity,./src/Box.sol,7,1,14
+Solidity,./src/TimeLock.sol,3,14,7
+SUM,,29,21,122
