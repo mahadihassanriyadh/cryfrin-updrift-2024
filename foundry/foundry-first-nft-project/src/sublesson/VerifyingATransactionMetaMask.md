@@ -1,4 +1,4 @@
-## Verify a transaction in MetaMask
+# Verify a transaction in MetaMask
 
 We are trying to send a transaction to the blockchain using MetaMask. A window pops up asking us to confirm the transaction. We go to the HEX tab and at the end we will see something like this:
 ```
