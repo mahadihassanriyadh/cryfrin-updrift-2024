@@ -1,3 +1,5 @@
+## Verify a transaction in MetaMask
+
 We are trying to send a transaction to the blockchain using MetaMask. A window pops up asking us to confirm the transaction. We go to the HEX tab and at the end we will see something like this:
 ```
 0x23b872dd000000000000000000000000ad1c737896cd841766bed18dd052d8244331e1db000000000000000000000000ad1c737896cd841766bed18dd052d8244331e1db0000000000000000000000000000000000000000000000000000000005f5e100
