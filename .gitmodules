@@ -67,3 +67,15 @@
 [submodule "foundry/foundry-dao/lib/openzeppelin-contracts"]
 	path = foundry/foundry-dao/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "security-and-auditing/3-passwordstore-audit/lib/foundry-devops"]
+	path = security-and-auditing/3-passwordstore-audit/lib/foundry-devops
+	url = https://github.com/chainaccelorg/foundry-devops
+[submodule "security-and-auditing/3-passwordstore-audit/lib/chainlink-brownie-contracts"]
+	path = security-and-auditing/3-passwordstore-audit/lib/chainlink-brownie-contracts
+	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
+[submodule "security-and-auditing/3-passwordstore-audit/lib/forge-std"]
+	path = security-and-auditing/3-passwordstore-audit/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "security-and-auditing/3-passwordstore-audit/lib/openzeppelin-contracts"]
+	path = security-and-auditing/3-passwordstore-audit/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
