@@ -82,6 +82,7 @@ forge coverage --report debug
 
 # Audit Scope Details
 
+- Actual Repo (onboarded branch): https://github.com/Cyfrin/3-passwordstore-audit/tree/onboarded
 - Commit Hash:  7d55682ddc4301a7b13ae9413095feffd9924566
 - In Scope:
 ```
