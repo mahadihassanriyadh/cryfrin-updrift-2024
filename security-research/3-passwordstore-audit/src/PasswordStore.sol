@@ -17,6 +17,7 @@ contract PasswordStore {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
     address private s_owner;
+    // @audit-bug the s_password variable is actually not private as it lives in the blockchain and can be accessed by anyone. So his is not a safe place to store a password.
     string private s_password;
 
     /*//////////////////////////////////////////////////////////////
