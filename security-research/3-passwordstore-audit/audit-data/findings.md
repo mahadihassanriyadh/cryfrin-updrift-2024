@@ -62,7 +62,33 @@ The natspec comment for the `PasswordStore::setPassword()` function states `This
 Anyone can set/change the password of the contract, severely breaking the functionality of the contract.
 
 ## Proof of Concept
+Add the following to the `PasswordStore.t.sol` file:
+<details>
+<summary>Code</summary>
+
+```javascript
+    function test_anyone_can_set_password(address _randomAddress) public {
+        vm.assume(_randomAddress != owner);
+        vm.startPrank(_randomAddress);
+        string memory expectedPassword = "myNewPassword";
+        passwordStore.setPassword(expectedPassword);
+
+        vm.startPrank(owner);
+        string memory actualPassword = passwordStore.getPassword();
+
+        assertEq(actualPassword, expectedPassword);
+    }
+```
+
+</details>
 
 ### Recommended Mitigation
-
-### Three Things to Remember
+Add an access control modifier to the `setPassword()` function to ensure only the owner can change the password.
+```javascript
+    modifier onlyOwner() {
+        if(msg.sender != owner) {
+            revert PasswordStore__NotOwner();
+        }
+        _;
+    }
+```
