@@ -1,3 +1,115 @@
+---
+title: Protocol Audit Report
+author: Md. Mahadi Hassan Riyadh
+date: May 21, 2024
+header-includes:
+  - \usepackage{titling}
+  - \usepackage{graphicx}
+---
+
+\begin{titlepage}
+    \centering
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{logo-black.pdf} 
+    \end{figure}
+    \vspace*{2cm}
+    {\Huge\bfseries Protocol Audit Report\par}
+    \vspace{1cm}
+    {\Large Version 1.0\par}
+    \vspace{2cm}
+    {\Large\itshape mahadihassanriyadh\par}
+    \vfill
+    {\large \today\par}
+\end{titlepage}
+
+\maketitle
+
+<!-- Your report starts here! -->
+
+Prepared by: [Md. Mahadi Hassan Riyadh](https://x.com/i_am_riyadh)
+Lead Security Researcher: 
+- Md. Mahadi Hassan Riyadh
+
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [Protocol Summary](#protocol-summary)
+- [Disclaimer](#disclaimer)
+- [Risk Classification](#risk-classification)
+- [Audit Details](#audit-details)
+  - [Scope](#scope)
+  - [Role](#role)
+- [Executive Summary](#executive-summary)
+  - [Issues found](#issues-found)
+- [Findings](#findings)
+  - [High](#high)
+    - [\[H-1\] Storing the password on-chain makes it visible to anyone, and no longer private](#h-1-storing-the-password-on-chain-makes-it-visible-to-anyone-and-no-longer-private)
+    - [\[H-2\] `PasswordStore::setPassword()` function has no access control, meaning anyone can change the password](#h-2-passwordstoresetpassword-function-has-no-access-control-meaning-anyone-can-change-the-password)
+  - [Medium](#medium)
+  - [Low](#low)
+  - [Informational](#informational)
+    - [\[I-1\] The `PasswordStore::getPassword()` netspec indicates a parameter that doesn't exist, causing the netspec to be incorrect](#i-1-the-passwordstoregetpassword-netspec-indicates-a-parameter-that-doesnt-exist-causing-the-netspec-to-be-incorrect)
+  - [Gas](#gas)
+
+# Protocol Summary
+
+PasswordStore is a protocol dedicated to storage and retrieval of a user's passwords. The protocol is designed to be used by a single user, and is not designed to be used by multiple users. Only the owner should be able to set and access this password.
+
+# Disclaimer
+
+The Perspectree team makes all effort to find as many vulnerabilities in the code in the given time period, but holds no responsibilities for the findings provided in this document.
+A security audit by the team is not an endorsement of the underlying business or product. The audit was time-boxed and the review of the code was solely on the security aspects of the Solidity implementation of the contracts.
+
+# Risk Classification
+
+|            |        | Impact |        |     |
+| ---------- | ------ | ------ | ------ | --- |
+|            |        | High   | Medium | Low |
+|            | High   | H      | H/M    | M   |
+| Likelihood | Medium | H/M    | M      | M/L |
+|            | Low    | M      | M/L    | L   |
+
+We use the [CodeHawks](https://docs.codehawks.com/hawks-auditors/how-to-evaluate-a-finding-severity) severity matrix to determine severity. See the documentation for more details.
+
+# Audit Details 
+
+Commit Hash:
+```bash
+7d55682ddc4301a7b13ae9413095feffd9924566
+```
+
+## Scope 
+
+```
+./src/
+└── PasswordStore.sol
+```
+
+## Role
+
+- Owner: The user who can set the password and read the password.
+- Outsiders: No one else should be able to set or read the password.
+  
+# Executive Summary
+
+*Add some notes about how the audit went, types of things you found, etc.*
+*We spent X hours with Z auditors using Y tools. etc*
+
+## Issues found
+
+| Severity          | Number of issues found |
+| ----------------- | ---------------------- |
+| High              | 2                      |
+| Medium            | 0                      |
+| Low               | 1                      |
+| Info              | 1                      |
+| Gas Optimizations | 0                      |
+| Total             | 0                      |
+
+# Findings
+
+## High
+
 ### [H-1] Storing the password on-chain makes it visible to anyone, and no longer private
 
 **Likelihood & Impact:**
@@ -111,6 +223,10 @@ Add an access control modifier to the `setPassword()` function to ensure only th
     }
 ```
 
+## Medium
+## Low 
+## Informational
+
 ### [I-1] The `PasswordStore::getPassword()` netspec indicates a parameter that doesn't exist, causing the netspec to be incorrect
 
 **Likelihood & Impact:**
@@ -140,3 +256,5 @@ Remove the incorrect natspec comment.
 -   * @param newPassword The new password to set.
 +
 ```
+
+## Gas 

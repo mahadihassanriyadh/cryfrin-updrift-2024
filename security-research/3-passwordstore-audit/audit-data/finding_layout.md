@@ -1,12 +1,11 @@
-# [S-#] TITLE (Root Cause + Impact)
+### [S-#] TITLE (Root Cause + Impact)
+**Description:**
 
-### Description
+**Impact:**
 
-### Impact 
+**Proof of Concept:**
 
-## Proof of Concept
-
-### Recommended Mitigation
+**Recommended Mitigation:**
 
 ### Three Things to Remember
 1. Convince the protocol this is an issue
