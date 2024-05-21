@@ -45,3 +45,24 @@ The below test case shows how anyone can read the password directly from the blo
 
 ### Recommended Mitigation
 Due to this, the overall architecture of the contract should be rethought. One could encrypt the password off-chain, and then store the encrypted password on-chain. This would require the user to remember another password off-chain to decrypt the password. However, you'd also likely want to remove the view function as you wouldn't want the user to accidentally send a transaction with the password that decrypts your password.
+
+# [S-#] `PasswordStore::setPassword()` function has no access control, meaning anyone can change the password
+
+### Description
+The natspec comment for the `PasswordStore::setPassword()` function states `This function allows only the owner to set a new password` but there is no access control in the function to enforce this. This means that anyone can call this function and change the password.
+```javascript
+    function setPassword(string memory newPassword) external {
+        // @audit-bug no access control
+        s_password = newPassword;
+        emit SetNetPassword();
+    }
+```
+
+### Impact 
+Anyone can set/change the password of the contract, severely breaking the functionality of the contract.
+
+## Proof of Concept
+
+### Recommended Mitigation
+
+### Three Things to Remember
