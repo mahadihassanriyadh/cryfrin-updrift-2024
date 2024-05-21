@@ -1,15 +1,14 @@
-### [S-#] TITLE (Root Cause + Impact)
+# [S-#] Storing the password on-chain makes it visible to anyone, and no longer private
 
-**Description:** 
+### Description
 
-**Impact:** 
+### Impact 
 
-**Proof of Concept:** / **Proof of Code:**
+## Proof of Concept
 
-**Recommended Mitigation:** 
+### Recommended Mitigation
 
-
-### Three Things to Remember:
+### Three Things to Remember
 1. Convince the protocol this is an issue
 2. How bad the issue is
 3. How to fix the issue
