@@ -17,7 +17,7 @@ contract PasswordStore {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
     address private s_owner;
-    // @audit-bug the s_password variable is actually not private as it lives in the blockchain and can be accessed by anyone. So his is not a safe place to store a password.
+    // @audit-issue the s_password variable is actually not private as it lives in the blockchain and can be accessed by anyone. So his is not a safe place to store a password.
     string private s_password;
 
     /*//////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ contract PasswordStore {
      * @notice This function allows only the owner to set a new password.
      * @param newPassword The new password to set.
      */
-    // @audit-bug any user can set the password
+    // @audit-issue any user can set the password
     // missing access control
     function setPassword(string memory newPassword) external {
         s_password = newPassword;
@@ -45,7 +45,7 @@ contract PasswordStore {
 
     /*
      * @notice This allows only the owner to retrieve the password.
-     * @audit-doc there is no parameter needed for this function, so the below comment is incorrect and should be removed
+     * @audit-info there is no parameter needed for this function, so the below comment is incorrect and should be removed
      * @param newPassword The new password to set.
      */
     function getPassword() external view returns (string memory) {
