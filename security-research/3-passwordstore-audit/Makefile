@@ -48,3 +48,7 @@ add:
 	git add -A
 	git commit -s -m "$(m)"
 	git push
+	
+# generate the audit report
+auditReport:
+	cd audit-data && pandoc report.md -o report.pdf --from markdown --template=eisvogel --listings
