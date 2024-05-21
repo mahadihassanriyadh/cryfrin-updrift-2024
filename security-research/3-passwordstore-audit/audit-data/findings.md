@@ -92,3 +92,25 @@ Add an access control modifier to the `setPassword()` function to ensure only th
         _;
     }
 ```
+
+# [S-#] The `PasswordStore::getPassword()` netspec indicates a parameter that doesn't exist, causing the netspec to be incorrect
+
+### Description
+```javascript
+    /**
+     * @notice This allows only the owner to retrieve the password.
+     * @audit-doc there is no parameter needed for this function, so the below comment is incorrect and should be removed
+     * @param newPassword The new password to set.
+     */
+    function getPassword() external view returns (string memory) {
+```
+
+### Impact 
+The natspec comment is incorrect and could cause confusion for developers reading the code.
+
+### Recommended Mitigation
+Remove the incorrect natspec comment.
+```diff
+-   * @param newPassword The new password to set.
++
+```

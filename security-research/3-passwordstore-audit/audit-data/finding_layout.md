@@ -1,4 +1,4 @@
-# [S-#] Storing the password on-chain makes it visible to anyone, and no longer private
+# [S-#] TITLE (Root Cause + Impact)
 
 ### Description
 
