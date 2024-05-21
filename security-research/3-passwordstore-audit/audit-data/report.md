@@ -82,7 +82,7 @@ Commit Hash:
 
 ```
 ./src/
-└── PasswordStore.sol
+#-- PasswordStore.sol
 ```
 
 ## Role
