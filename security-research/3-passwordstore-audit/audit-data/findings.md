@@ -1,4 +1,9 @@
-# [S-#] Storing the password on-chain makes it visible to anyone, and no longer private
+# [H-1] Storing the password on-chain makes it visible to anyone, and no longer private
+
+### Likelihood & Impact
+- Impact: High
+- Likelihood: High
+- Severity: High / Critical
 
 ### Description
 All data stored on-chain is visible to anyone, and can be read directly from the blockchain. The `PasswordStore::s_password` variable is intended to be a private variable and should only be accessed through `PasswordStore::getPassword()` function, which is intended to be only called by the owner of the contract.
@@ -46,7 +51,12 @@ The below test case shows how anyone can read the password directly from the blo
 ### Recommended Mitigation
 Due to this, the overall architecture of the contract should be rethought. One could encrypt the password off-chain, and then store the encrypted password on-chain. This would require the user to remember another password off-chain to decrypt the password. However, you'd also likely want to remove the view function as you wouldn't want the user to accidentally send a transaction with the password that decrypts your password.
 
-# [S-#] `PasswordStore::setPassword()` function has no access control, meaning anyone can change the password
+# [H-2] `PasswordStore::setPassword()` function has no access control, meaning anyone can change the password
+
+### Likelihood & Impact
+- Impact: High
+- Likelihood: High
+- Severity: High / Critical
 
 ### Description
 The natspec comment for the `PasswordStore::setPassword()` function states `This function allows only the owner to set a new password` but there is no access control in the function to enforce this. This means that anyone can call this function and change the password.
@@ -93,7 +103,12 @@ Add an access control modifier to the `setPassword()` function to ensure only th
     }
 ```
 
-# [S-#] The `PasswordStore::getPassword()` netspec indicates a parameter that doesn't exist, causing the netspec to be incorrect
+# [I-1] The `PasswordStore::getPassword()` netspec indicates a parameter that doesn't exist, causing the netspec to be incorrect
+
+### Likelihood & Impact
+- Impact: None
+- Likelihood: Low
+- Severity: Informational / Gas / Non-critical
 
 ### Description
 ```javascript
