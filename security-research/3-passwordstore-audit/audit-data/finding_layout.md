@@ -1,4 +1,10 @@
 ### [S-#] TITLE (Root Cause + Impact)
+
+**Likelihood & Impact:**
+- Impact: High
+- Likelihood: High
+- Severity: High / Critical
+  
 **Description:**
 
 **Impact:**
