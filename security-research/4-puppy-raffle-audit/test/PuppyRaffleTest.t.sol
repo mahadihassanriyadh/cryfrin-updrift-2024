@@ -195,6 +195,7 @@ contract PuppyRaffleTest is Test {
         vm.roll(block.number + 1);
 
         puppyRaffle.selectWinner();
+        console.log("Previous Winner: %s", puppyRaffle.previousWinner());
         assertEq(puppyRaffle.previousWinner(), playerFour);
     }
 
