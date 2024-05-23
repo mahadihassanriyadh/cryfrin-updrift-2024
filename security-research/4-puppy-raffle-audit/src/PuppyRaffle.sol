@@ -114,6 +114,8 @@ contract PuppyRaffle is ERC721, Ownable {
                 return i;
             }
         }
+        // @audit-info what if the player is at index 0?
+        // @audit if the player is at index 0, it will return 0 and a player might think they are not active or in the raffle!
         return 0;
     }
 
