@@ -132,6 +132,9 @@ contract PuppyRaffle is ERC721, Ownable {
         uint256 winnerIndex =
             uint256(keccak256(abi.encodePacked(msg.sender, block.timestamp, block.difficulty))) % players.length;
         address winner = players[winnerIndex];
+        // @audit what if some players refunded? The array will have blank spots, resulting in miscalculations of totalAmountCollected
+        // if less than or equal to 20% of the players refunded, the winner would still get the money (more than they should) resulting in a loss for the contract
+        // if more than 20% of the players refunded, then this function would revert resulting in a state where the contract is stuck and all the funds are locked 🔒
         uint256 totalAmountCollected = players.length * entranceFee;
         uint256 prizePool = (totalAmountCollected * 80) / 100;
         uint256 fee = (totalAmountCollected * 20) / 100;

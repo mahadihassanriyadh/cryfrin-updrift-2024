@@ -12,6 +12,9 @@ contract PuppyRaffleTest is Test {
     address playerTwo = address(2);
     address playerThree = address(3);
     address playerFour = address(4);
+    address playerFive = address(5);
+    address playerSix = address(6);
+    address playerSeven = address(7);
     address feeAddress = address(99);
     uint256 duration = 1 days;
 
@@ -156,12 +159,15 @@ contract PuppyRaffleTest is Test {
     /// selectWinner         ///
     /////////////////////
     modifier playersEntered() {
-        address[] memory players = new address[](4);
+        address[] memory players = new address[](7);
         players[0] = playerOne;
         players[1] = playerTwo;
         players[2] = playerThree;
         players[3] = playerFour;
-        puppyRaffle.enterRaffle{value: entranceFee * 4}(players);
+        players[4] = playerFive;
+        players[5] = playerSix;
+        players[6] = playerSeven;
+        puppyRaffle.enterRaffle{value: entranceFee * 7}(players);
         _;
     }
 
@@ -192,13 +198,28 @@ contract PuppyRaffleTest is Test {
         assertEq(puppyRaffle.previousWinner(), playerFour);
     }
 
+    // @audit-issue - This test is used to check if the SelectWinner function reverts if anyone is refunded, resulting in a state where the contract can't select a winner anymore, ultimately locking the funds in the contract
+    function testSelectWinnerRevertsIfAnyoneRefunded() public playersEntered {
+        uint256 indexOfPlayer = puppyRaffle.getActivePlayerIndex(playerOne);
+        vm.prank(playerOne);
+        puppyRaffle.refund(indexOfPlayer);
+         vm.prank(playerTwo);
+        puppyRaffle.refund(indexOfPlayer+1);
+
+        vm.warp(block.timestamp + duration + 1);
+        vm.roll(block.number + 1);
+
+        vm.expectRevert("PuppyRaffle: Failed to send prize pool to winner");
+        puppyRaffle.selectWinner();
+    }
+
     function testSelectWinnerGetsPaid() public playersEntered {
         uint256 balanceBefore = address(playerFour).balance;
 
         vm.warp(block.timestamp + duration + 1);
         vm.roll(block.number + 1);
 
-        uint256 expectedPayout = ((entranceFee * 4) * 80 / 100);
+        uint256 expectedPayout = ((entranceFee * 7) * 80 / 100);
 
         puppyRaffle.selectWinner();
         assertEq(address(playerFour).balance, balanceBefore + expectedPayout);
@@ -235,13 +256,14 @@ contract PuppyRaffleTest is Test {
         vm.warp(block.timestamp + duration + 1);
         vm.roll(block.number + 1);
 
-        uint256 expectedPrizeAmount = ((entranceFee * 4) * 20) / 100;
+        uint256 expectedPrizeAmount = ((entranceFee * 7) * 20) / 100;
 
         puppyRaffle.selectWinner();
         puppyRaffle.withdrawFees();
         assertEq(address(feeAddress).balance, expectedPrizeAmount);
     }
 
+    // @audit-issue - This test is used to test reentrancy attack on the PuppyRaffle contract
     function testReentrancyRefund() public {
         address[] memory players = new address[](4);
         players[0] = playerOne;
@@ -265,6 +287,7 @@ contract PuppyRaffleTest is Test {
     }
 }
 
+// @audit-issue - This contract is used to test reentrancy attack on the PuppyRaffle contract
 contract ReentrancyAttack {
     PuppyRaffle puppyRaffle;
 
