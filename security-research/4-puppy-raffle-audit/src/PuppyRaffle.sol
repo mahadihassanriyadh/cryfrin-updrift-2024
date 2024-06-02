@@ -148,6 +148,16 @@ contract PuppyRaffle is ERC721, Ownable {
 
         // @audit-info total fees the owner should be able to collect
         // @audit overflow
+        // fix: newer versions of solidity have built-in overflow checks and will revert if an overflow occurs, also we probably don't want to use uint64
+        // we can quickly check the max value of uint64 to see if there's a potential overflow
+        /*  
+            go to terminal:
+                $ chisel
+                > type(uint64).max
+            the decimal value is 18446744073709551615
+        */
+        // as wei is 18 decimals, if we use totalFees as uint64, it can hold a maximum value of 18.446744073709551615 ETH
+        //  so there is a good chance that the totalFees can overflow
         totalFees = totalFees + uint64(fee);
 
         uint256 tokenId = totalSupply();
