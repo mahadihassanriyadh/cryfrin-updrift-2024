@@ -130,15 +130,24 @@ contract PuppyRaffle is ERC721, Ownable {
         require(block.timestamp >= raffleStartTime + raffleDuration, "PuppyRaffle: Raffle not over");
         require(players.length >= 4, "PuppyRaffle: Need at least 4 players");
         // @audit randomness, is this okay? Is this actually random?
+        // this is not random, it is a deterministic function that can be manipulated by the caller
+        // fix: Chainlink VRF, Commit Reveal Scheme
         uint256 winnerIndex =
             uint256(keccak256(abi.encodePacked(msg.sender, block.timestamp, block.difficulty))) % players.length;
         address winner = players[winnerIndex];
+
         // @audit what if some players refunded? The array will have blank spots, resulting in miscalculations of totalAmountCollected
         // if less than or equal to 20% of the players refunded, the winner would still get the money (more than they should) resulting in a loss for the contract
         // if more than 20% of the players refunded, then this function would revert resulting in a state where the contract is stuck and all the funds are locked 🔒
+        // @audit-info also why not address(this).balance?
         uint256 totalAmountCollected = players.length * entranceFee;
+
+        // @audit-info is the prizePool calculation correct, 80% of the totalAmountCollected?
         uint256 prizePool = (totalAmountCollected * 80) / 100;
         uint256 fee = (totalAmountCollected * 20) / 100;
+
+        // @audit-info total fees the owner should be able to collect
+        // @audit overflow
         totalFees = totalFees + uint64(fee);
 
         uint256 tokenId = totalSupply();
