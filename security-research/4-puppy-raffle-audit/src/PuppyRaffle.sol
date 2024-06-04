@@ -142,7 +142,7 @@ contract PuppyRaffle is ERC721, Ownable {
         // @audit-info also why not address(this).balance?
         uint256 totalAmountCollected = players.length * entranceFee;
 
-        // @audit-info is the prizePool calculation correct, 80% of the totalAmountCollected?
+        // @audit-ok is the prizePool calculation correct, 80% of the totalAmountCollected?
         uint256 prizePool = (totalAmountCollected * 80) / 100;
         uint256 fee = (totalAmountCollected * 20) / 100;
 
