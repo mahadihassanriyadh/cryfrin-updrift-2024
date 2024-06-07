@@ -160,9 +160,11 @@ contract PuppyRaffle is ERC721, Ownable {
         //  so there is a good chance that the totalFees can overflow
         totalFees = totalFees + uint64(fee);
 
+        // i when we mint a new puppy NFT, we use the totalSupply as the tokenId
         uint256 tokenId = totalSupply();
 
         // We use a different RNG calculate from the winnerIndex to determine rarity
+        // @audit randomness issue
         uint256 rarity = uint256(keccak256(abi.encodePacked(msg.sender, block.difficulty))) % 100;
         if (rarity <= COMMON_RARITY) {
             tokenIdToRarity[tokenId] = COMMON_RARITY;
@@ -172,9 +174,11 @@ contract PuppyRaffle is ERC721, Ownable {
             tokenIdToRarity[tokenId] = LEGENDARY_RARITY;
         }
 
-        delete players;
-        raffleStartTime = block.timestamp;
+        delete players; // i resetting the players array
+        raffleStartTime = block.timestamp; // i resetting the raffle start time
         previousWinner = winner;
+
+        // @audit possible reentrancy, can we do a reentrancy attack here?
         (bool success,) = winner.call{value: prizePool}("");
         require(success, "PuppyRaffle: Failed to send prize pool to winner");
         _safeMint(winner, tokenId);
