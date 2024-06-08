@@ -165,6 +165,8 @@ contract PuppyRaffle is ERC721, Ownable {
 
         // We use a different RNG calculate from the winnerIndex to determine rarity
         // @audit randomness issue
+        // q if our transaction picks a winner and we don't like it... revert?
+        // q gas war... @follow-up
         uint256 rarity = uint256(keccak256(abi.encodePacked(msg.sender, block.difficulty))) % 100;
         if (rarity <= COMMON_RARITY) {
             tokenIdToRarity[tokenId] = COMMON_RARITY;
@@ -174,11 +176,15 @@ contract PuppyRaffle is ERC721, Ownable {
             tokenIdToRarity[tokenId] = LEGENDARY_RARITY;
         }
 
+        // @audit-info it looks like in order to reset players array or restart the raffle time, we need to call this selectWinner() function
+        // and if by any chance we are not able to call this function, the contract will be stuck and all the funds will be locked 🔒
         delete players; // i resetting the players array
         raffleStartTime = block.timestamp; // i resetting the raffle start time
         previousWinner = winner;
 
         // @audit possible reentrancy, can we do a reentrancy attack here?
+        // q what if the winner is a contract that reverts on receiving funds?
+        // i the winner wouldn't get the money if their fallback was messed up!
         (bool success,) = winner.call{value: prizePool}("");
         require(success, "PuppyRaffle: Failed to send prize pool to winner");
         _safeMint(winner, tokenId);
@@ -186,9 +192,13 @@ contract PuppyRaffle is ERC721, Ownable {
 
     /// @notice this function will withdraw the fees to the feeAddress
     function withdrawFees() external {
+        // @audit overflow; totalFees is a uint64, is this okay?
+        // q so if the protocol has players someone can't withdraw fees?
+        // q is it difficult to withdraw fees?
         require(address(this).balance == uint256(totalFees), "PuppyRaffle: There are currently players active!");
         uint256 feesToWithdraw = totalFees;
         totalFees = 0;
+        // q what if the feeAddress is a contract that reverts on receiving funds?
         (bool success,) = feeAddress.call{value: feesToWithdraw}("");
         require(success, "PuppyRaffle: Failed to withdraw fees");
     }
