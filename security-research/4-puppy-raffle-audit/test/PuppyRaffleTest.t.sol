@@ -262,7 +262,14 @@ contract PuppyRaffleTest is Test {
         assertEq(address(feeAddress).balance, expectedPrizeAmount);
     }
 
-    // adu
+    // @audit-issue - Checking if I can send money to the contract
+    function testCanSendMoneyToRaffle() public{
+        address SENDER = makeAddr("sender");
+        vm.deal(SENDER, 5 ether);
+        vm.expectRevert();
+        vm.prank(SENDER);
+        (bool success, ) = payable(SENDER).call{value: 2 ether}("");
+    } 
 
     // @audit-issue - Overflow
     /**
