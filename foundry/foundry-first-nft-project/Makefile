@@ -61,5 +61,5 @@ coverage-report:; @forge coverage --report debug > test-coverage.txt
 
 add:
 	git add -A
-	git commit -s -m "$(m)"
+	git commit -S -m "$(m)"
 	git push

@@ -65,7 +65,7 @@ coverage-report:; @forge coverage --report debug > test-coverage.txt
 
 add:
 	git add -A
-	git commit -s -m "$(m)"
+	git commit -S -m "$(m)"
 	git push
 
 # to print all the functios of that contract including the selectors of those functions

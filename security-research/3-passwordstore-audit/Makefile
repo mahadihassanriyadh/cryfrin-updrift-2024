@@ -46,7 +46,7 @@ deploy:
 
 add:
 	git add -A
-	git commit -s -m "$(m)"
+	git commit -S -m "$(m)"
 	git push
 	
 # generate the audit report
