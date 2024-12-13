@@ -20,6 +20,61 @@ interface PersonResponse {
     favNum: string;
 }
 
+const ZKSYNC_SEPOLIA_CHAIN_ID = 300; // zkSync Sepolia Chain ID
+const ZKSYNC_SEPOLIA_NETWORK = {
+    chainId: `0x${ZKSYNC_SEPOLIA_CHAIN_ID.toString(16)}`,
+    chainName: "zkSync Sepolia",
+    nativeCurrency: {
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+    },
+    rpcUrls: ["https://sepolia.era.zksync.dev"],
+    blockExplorerUrls: ["https://sepolia.explorer.zksync.io/"],
+};
+
+const checkAndSwitchNetwork = async () => {
+    if (!window.ethereum) return false;
+
+    try {
+        // Check if we're already on the correct network
+        const chainId = await window.ethereum.request({
+            method: "eth_chainId",
+        });
+        if (chainId === ZKSYNC_SEPOLIA_NETWORK.chainId) {
+            return true;
+        }
+
+        // Switch to zkSync Sepolia
+        try {
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: ZKSYNC_SEPOLIA_NETWORK.chainId }],
+            });
+            return true;
+        } catch (switchError: any) {
+            // This error code indicates that the chain has not been added to MetaMask
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: "wallet_addEthereumChain",
+                        params: [ZKSYNC_SEPOLIA_NETWORK],
+                    });
+                    return true;
+                } catch (addError) {
+                    console.error("Failed to add network:", addError);
+                    return false;
+                }
+            }
+            console.error("Failed to switch network:", switchError);
+            return false;
+        }
+    } catch (error) {
+        console.error("Failed to check network:", error);
+        return false;
+    }
+};
+
 function App() {
     const [web3, setWeb3] = useState<Web3 | null>(null);
     const [account, setAccount] = useState<string>("");
@@ -38,6 +93,15 @@ function App() {
     const connectWallet = async () => {
         if (window.ethereum) {
             try {
+                // First check and switch to the correct network
+                const networkSwitched = await checkAndSwitchNetwork();
+                if (!networkSwitched) {
+                    alert(
+                        "Please switch to zkSync Sepolia network to continue"
+                    );
+                    return;
+                }
+
                 const web3Instance = new Web3(window.ethereum);
                 await window.ethereum.request({
                     method: "eth_requestAccounts",
@@ -144,6 +208,30 @@ function App() {
             getPeople();
         }
     }, [account, getPeople]);
+
+    useEffect(() => {
+        if (window.ethereum) {
+            // Handle chain changes
+            window.ethereum.on("chainChanged", (chainId: unknown) => {
+                if (chainId === ZKSYNC_SEPOLIA_NETWORK.chainId) {
+                    setAccount(""); // Disconnect if wrong network
+                    setWeb3(null);
+                    alert("Please switch to zkSync Sepolia network");
+                }
+            });
+
+            // Handle account changes
+            window.ethereum.on("accountsChanged", (accounts: unknown) => {
+                const accountsArray = accounts as string[];
+                if (accountsArray.length > 0) {
+                    setAccount(accountsArray[0]);
+                } else {
+                    setAccount("");
+                    setWeb3(null);
+                }
+            });
+        }
+    }, []);
 
     const LoadingSpinner = () => (
         <svg
