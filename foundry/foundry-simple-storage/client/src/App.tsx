@@ -23,9 +23,10 @@ interface PersonResponse {
 function App() {
     const [web3, setWeb3] = useState<Web3 | null>(null);
     const [account, setAccount] = useState<string>("");
-    const [favNumber, setFavNumber] = useState<string>("");
+    const [storeNumber, setStoreNumber] = useState<string>("");
     const [storedNumber, setStoredNumber] = useState<string>("");
     const [name, setName] = useState<string>("");
+    const [personFavNumber, setPersonFavNumber] = useState<string>("");
     const [people, setPeople] = useState<Person[]>([]);
 
     // Loading states
@@ -82,16 +83,17 @@ function App() {
         }
     }, [web3]);
 
-    const storeNumber = async () => {
+    const storeNumberFunction = async () => {
         if (!web3 || !account) return;
         setIsStoring(true);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         try {
-            await contract.methods.store(favNumber).send({
+            await contract.methods.store(storeNumber).send({
                 from: account,
                 gas: "200000",
             });
             alert("Number stored successfully!");
+            setStoreNumber(""); // Clear the input after success
         } catch (error: unknown) {
             console.error("Error storing number:", error);
         } finally {
@@ -115,21 +117,21 @@ function App() {
 
     const addPerson = async () => {
         if (!web3 || !account) return;
-        if (!name || !favNumber) {
+        if (!name || !personFavNumber) {
             alert("Please enter both name and favorite number");
             return;
         }
         setIsAddingPerson(true);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         try {
-            await contract.methods.addPerson(name, favNumber).send({
+            await contract.methods.addPerson(name, personFavNumber).send({
                 from: account,
                 gas: "200000",
             });
             alert("Person added successfully!");
             await getPeople();
             setName("");
-            setFavNumber("");
+            setPersonFavNumber(""); // Clear person's favorite number
         } catch (error: unknown) {
             console.error("Error adding person:", error);
         } finally {
@@ -196,17 +198,17 @@ function App() {
                         </h2>
                         <input
                             type="number"
-                            value={favNumber}
-                            onChange={(e) => setFavNumber(e.target.value)}
+                            value={storeNumber}
+                            onChange={(e) => setStoreNumber(e.target.value)}
                             className="w-full p-2 rounded bg-gray-600 text-white"
                             placeholder="Enter your favorite number"
                             disabled={!account || isStoring}
                         />
                         <button
-                            onClick={storeNumber}
-                            disabled={!account || isStoring}
+                            onClick={storeNumberFunction}
+                            disabled={!account || isStoring || !storeNumber}
                             className={`mt-4 w-full font-bold py-2 px-4 rounded transition-colors ${
-                                !account || isStoring
+                                !account || isStoring || !storeNumber
                                     ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                                     : "bg-purple-600 hover:bg-purple-700 text-white"
                             }`}
@@ -266,8 +268,10 @@ function App() {
                             />
                             <input
                                 type="number"
-                                value={favNumber}
-                                onChange={(e) => setFavNumber(e.target.value)}
+                                value={personFavNumber}
+                                onChange={(e) =>
+                                    setPersonFavNumber(e.target.value)
+                                }
                                 className="w-full p-2 rounded bg-gray-600 text-white"
                                 placeholder="Enter favorite number"
                                 disabled={!account || isAddingPerson}
@@ -278,13 +282,13 @@ function App() {
                                     !account ||
                                     isAddingPerson ||
                                     !name ||
-                                    !favNumber
+                                    !personFavNumber
                                 }
                                 className={`w-full font-bold py-2 px-4 rounded transition-colors ${
                                     !account ||
                                     isAddingPerson ||
                                     !name ||
-                                    !favNumber
+                                    !personFavNumber
                                         ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                                         : "bg-purple-600 hover:bg-purple-700 text-white"
                                 }`}
