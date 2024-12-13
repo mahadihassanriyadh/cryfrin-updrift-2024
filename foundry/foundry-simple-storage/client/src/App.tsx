@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Web3 from "web3";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "./config/contract";
 import type { MetaMaskInpageProvider } from "@metamask/providers";
@@ -10,12 +10,29 @@ declare global {
     }
 }
 
+interface Person {
+    name: string;
+    favNum: string;
+}
+
+interface PersonResponse {
+    name: string;
+    favNum: string;
+}
+
 function App() {
     const [web3, setWeb3] = useState<Web3 | null>(null);
     const [account, setAccount] = useState<string>("");
     const [favNumber, setFavNumber] = useState<string>("");
     const [storedNumber, setStoredNumber] = useState<string>("");
     const [name, setName] = useState<string>("");
+    const [people, setPeople] = useState<Person[]>([]);
+
+    // Loading states
+    const [isStoring, setIsStoring] = useState(false);
+    const [isRetrieving, setIsRetrieving] = useState(false);
+    const [isAddingPerson, setIsAddingPerson] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const connectWallet = async () => {
         if (window.ethereum) {
@@ -35,40 +52,119 @@ function App() {
         }
     };
 
-    const storeNumber = async () => {
-        if (!web3 || !account) return;
+    const getPeople = useCallback(async () => {
+        if (!web3) return;
+        setIsRefreshing(true);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         try {
-            await contract.methods.store(favNumber).send({ from: account });
+            let index = 0;
+            const peopleList: Person[] = [];
+
+            while (true) {
+                try {
+                    const person = (await contract.methods
+                        .dynamicListOfPeople(index)
+                        .call()) as PersonResponse;
+                    peopleList.push({
+                        name: person.name,
+                        favNum: person.favNum.toString(),
+                    });
+                    index++;
+                } catch {
+                    break;
+                }
+            }
+            setPeople(peopleList);
+        } catch (error: unknown) {
+            console.error("Error fetching people:", error);
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [web3]);
+
+    const storeNumber = async () => {
+        if (!web3 || !account) return;
+        setIsStoring(true);
+        const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+        try {
+            await contract.methods.store(favNumber).send({
+                from: account,
+                gas: "200000",
+            });
             alert("Number stored successfully!");
         } catch (error: unknown) {
             console.error("Error storing number:", error);
+        } finally {
+            setIsStoring(false);
         }
     };
 
     const retrieveNumber = async () => {
         if (!web3 || !account) return;
+        setIsRetrieving(true);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         try {
             const result: number = await contract.methods.retrieve().call();
             setStoredNumber(result.toString());
         } catch (error: unknown) {
             console.error("Error retrieving number:", error);
+        } finally {
+            setIsRetrieving(false);
         }
     };
 
     const addPerson = async () => {
         if (!web3 || !account) return;
+        if (!name || !favNumber) {
+            alert("Please enter both name and favorite number");
+            return;
+        }
+        setIsAddingPerson(true);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         try {
-            await contract.methods
-                .addPerson(name, favNumber)
-                .send({ from: account });
+            await contract.methods.addPerson(name, favNumber).send({
+                from: account,
+                gas: "200000",
+            });
             alert("Person added successfully!");
+            await getPeople();
+            setName("");
+            setFavNumber("");
         } catch (error: unknown) {
             console.error("Error adding person:", error);
+        } finally {
+            setIsAddingPerson(false);
         }
     };
+
+    useEffect(() => {
+        if (account) {
+            getPeople();
+        }
+    }, [account, getPeople]);
+
+    const LoadingSpinner = () => (
+        <svg
+            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+        >
+            <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+            ></circle>
+            <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+        </svg>
+    );
 
     return (
         <div className="min-h-screen py-8 px-4 max-w-4xl mx-auto">
@@ -104,18 +200,25 @@ function App() {
                             onChange={(e) => setFavNumber(e.target.value)}
                             className="w-full p-2 rounded bg-gray-600 text-white"
                             placeholder="Enter your favorite number"
-                            disabled={!account}
+                            disabled={!account || isStoring}
                         />
                         <button
                             onClick={storeNumber}
+                            disabled={!account || isStoring}
                             className={`mt-4 w-full font-bold py-2 px-4 rounded transition-colors ${
-                                account
-                                    ? "bg-purple-600 hover:bg-purple-700 text-white"
-                                    : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                !account || isStoring
+                                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                    : "bg-purple-600 hover:bg-purple-700 text-white"
                             }`}
-                            disabled={!account}
                         >
-                            Store Number
+                            {isStoring ? (
+                                <span className="flex items-center justify-center">
+                                    <LoadingSpinner />
+                                    Storing...
+                                </span>
+                            ) : (
+                                "Store Number"
+                            )}
                         </button>
                     </div>
 
@@ -126,14 +229,21 @@ function App() {
                         <div className="flex space-x-4">
                             <button
                                 onClick={retrieveNumber}
+                                disabled={!account || isRetrieving}
                                 className={`flex-1 font-bold py-2 px-4 rounded transition-colors ${
-                                    account
-                                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                    !account || isRetrieving
+                                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                        : "bg-purple-600 hover:bg-purple-700 text-white"
                                 }`}
-                                disabled={!account}
                             >
-                                Get Number
+                                {isRetrieving ? (
+                                    <span className="flex items-center justify-center">
+                                        <LoadingSpinner />
+                                        Getting...
+                                    </span>
+                                ) : (
+                                    "Get Number"
+                                )}
                             </button>
                             <div className="flex-1 p-2 bg-gray-600 rounded text-center">
                                 {storedNumber || "No number retrieved"}
@@ -152,20 +262,88 @@ function App() {
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full p-2 rounded bg-gray-600 text-white"
                                 placeholder="Enter name"
-                                disabled={!account}
+                                disabled={!account || isAddingPerson}
+                            />
+                            <input
+                                type="number"
+                                value={favNumber}
+                                onChange={(e) => setFavNumber(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-600 text-white"
+                                placeholder="Enter favorite number"
+                                disabled={!account || isAddingPerson}
                             />
                             <button
                                 onClick={addPerson}
+                                disabled={
+                                    !account ||
+                                    isAddingPerson ||
+                                    !name ||
+                                    !favNumber
+                                }
                                 className={`w-full font-bold py-2 px-4 rounded transition-colors ${
-                                    account
-                                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                    !account ||
+                                    isAddingPerson ||
+                                    !name ||
+                                    !favNumber
+                                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                        : "bg-purple-600 hover:bg-purple-700 text-white"
                                 }`}
-                                disabled={!account}
                             >
-                                Add Person
+                                {isAddingPerson ? (
+                                    <span className="flex items-center justify-center">
+                                        <LoadingSpinner />
+                                        Adding...
+                                    </span>
+                                ) : (
+                                    "Add Person"
+                                )}
                             </button>
                         </div>
+                    </div>
+
+                    <div className="bg-gray-700 p-6 rounded-lg">
+                        <h2 className="text-xl font-semibold mb-4 text-purple-300">
+                            People List
+                        </h2>
+                        <div className="space-y-2">
+                            {people.length === 0 ? (
+                                <p className="text-gray-400">
+                                    No people added yet
+                                </p>
+                            ) : (
+                                people.map((person, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex justify-between items-center bg-gray-600 p-3 rounded"
+                                    >
+                                        <span className="text-purple-300">
+                                            {person.name}
+                                        </span>
+                                        <span className="text-gray-300">
+                                            Favorite Number: {person.favNum}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <button
+                            onClick={getPeople}
+                            disabled={!account || isRefreshing}
+                            className={`mt-4 w-full font-bold py-2 px-4 rounded transition-colors ${
+                                !account || isRefreshing
+                                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                    : "bg-purple-600 hover:bg-purple-700 text-white"
+                            }`}
+                        >
+                            {isRefreshing ? (
+                                <span className="flex items-center justify-center">
+                                    <LoadingSpinner />
+                                    Refreshing...
+                                </span>
+                            ) : (
+                                "Refresh List"
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>

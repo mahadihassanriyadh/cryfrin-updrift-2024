@@ -1,9 +1,19 @@
+// src/config/contract.ts
 export const CONTRACT_ADDRESS = "0x32C97d9FA176b459C62B2aEBb21E0E7877BE712d";
+
 export const CONTRACT_ABI = [
     {
         inputs: [
-            { internalType: "string", name: "_name", type: "string" },
-            { internalType: "uint256", name: "_favNum", type: "uint256" },
+            {
+                internalType: "string",
+                name: "_name",
+                type: "string",
+            },
+            {
+                internalType: "uint256",
+                name: "_favNum",
+                type: "uint256",
+            },
         ],
         name: "addPerson",
         outputs: [],
@@ -11,14 +21,69 @@ export const CONTRACT_ABI = [
         type: "function",
     },
     {
-        inputs: [],
-        name: "retrieve",
-        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+        inputs: [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+            },
+        ],
+        name: "dynamicListOfPeople",
+        outputs: [
+            {
+                internalType: "uint256",
+                name: "favNum",
+                type: "uint256",
+            },
+            {
+                internalType: "string",
+                name: "name",
+                type: "string",
+            },
+        ],
         stateMutability: "view",
         type: "function",
     },
     {
-        inputs: [{ internalType: "uint256", name: "_favNum", type: "uint256" }],
+        inputs: [
+            {
+                internalType: "string",
+                name: "",
+                type: "string",
+            },
+        ],
+        name: "nameToFavNumber",
+        outputs: [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+            },
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [],
+        name: "retrieve",
+        outputs: [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+            },
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "uint256",
+                name: "_favNum",
+                type: "uint256",
+            },
+        ],
         name: "store",
         outputs: [],
         stateMutability: "nonpayable",
