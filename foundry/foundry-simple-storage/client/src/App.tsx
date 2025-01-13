@@ -52,7 +52,7 @@ const checkAndSwitchNetwork = async () => {
                 params: [{ chainId: ZKSYNC_SEPOLIA_NETWORK.chainId }],
             });
             return true;
-        } catch (switchError: any) {
+        } catch (switchError: unknown) {
             // This error code indicates that the chain has not been added to MetaMask
             if (switchError.code === 4902) {
                 try {
