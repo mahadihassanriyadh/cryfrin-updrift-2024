@@ -53,8 +53,8 @@ const checkAndSwitchNetwork = async () => {
             });
             return true;
         } catch (switchError: unknown) {
-            // This error code indicates that the chain has not been added to MetaMask
-            if (switchError.code === 4902) {
+            const error = switchError as { code: number };
+            if (error.code === 4902) {
                 try {
                     await window.ethereum.request({
                         method: "wallet_addEthereumChain",
